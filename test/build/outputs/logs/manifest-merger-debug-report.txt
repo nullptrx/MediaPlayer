@@ -1,0 +1,71 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+	package
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:2:11-30
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+	android:versionName
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+	android:versionCode
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:1-25:12
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+	xmlns:android
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:1:11-69
+uses-permission#android.permission.ACCESS_WIFI_STATE
+ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:4:5-75
+	android:name
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:4:22-73
+uses-permission#android.permission.READ_PHONE_STATE
+ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:5:5-74
+	android:name
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:5:22-72
+application
+ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:7:5-24:19
+	android:supportsRtl
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:11:9-35
+	android:label
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:10:9-41
+	android:icon
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:9:9-43
+	android:allowBackup
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:8:9-35
+	android:theme
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:12:9-40
+activity#com.start.StartActivity
+ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:13:9-22:20
+	android:name
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:14:13-42
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:15:13-21:29
+action#android.intent.action.MAIN
+ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:16:17-17:64
+	android:name
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:17:21-62
+category#android.intent.category.LAUNCHER
+ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:19:17-20:70
+	android:name
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml:20:21-68
+uses-sdk
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+		ADDED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
+		INJECTED from /home/su/AndroidStudioProjects/PlayerDemo/test/src/main/AndroidManifest.xml
