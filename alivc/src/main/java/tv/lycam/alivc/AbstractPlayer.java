@@ -177,7 +177,7 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
             mSurfaceContainer.removeAllViews();
         }
         mTextureView = new TextureView(mContext);
-        mTextureView.setLayerType(TextureView.LAYER_TYPE_SOFTWARE, null);
+//        mTextureView.setLayerType(TextureView.LAYER_TYPE_SOFTWARE, null);
         mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
         if (mSurfaceContainer instanceof RelativeLayout) {
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
@@ -634,6 +634,17 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
                 };
     }
 
+
+    public static int getWight(Context context) {
+        DisplayMetrics dm = new DisplayMetrics();
+        Activity activity = CommonUtil.getActivityContext(context);
+        if (activity != null) {
+            activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+        }
+        int screenWidth = dm.widthPixels;
+        return screenWidth;
+    }
+
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
@@ -649,7 +660,7 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
 
             //设置view的布局，宽高之类
             ViewGroup.LayoutParams surfaceViewLayoutParams = getLayoutParams();
-            surfaceViewLayoutParams.height = (int) (getWight(mContext) * 9.0f / 16);
+            surfaceViewLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
             surfaceViewLayoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
 
         } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {                //转到横屏了。
@@ -667,15 +678,4 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
 
         }
     }
-
-    public static int getWight(Context context) {
-        DisplayMetrics dm = new DisplayMetrics();
-        Activity activity = CommonUtil.getActivityContext(context);
-        if (activity != null) {
-            activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        }
-        int screenWidth = dm.widthPixels;
-        return screenWidth;
-    }
-
 }
