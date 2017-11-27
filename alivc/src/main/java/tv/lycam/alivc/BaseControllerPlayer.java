@@ -58,6 +58,7 @@ public abstract class BaseControllerPlayer extends BasePlayer {
     private boolean mInstantSeeking = false;
     protected boolean isForbidAdjustVolumn = false;
     protected boolean isForbidAdjustBrightness = false;
+    protected boolean isForbidChangePosition = false;
 
     //进度定时器
     protected Timer updateProcessTimer;
@@ -611,7 +612,6 @@ public abstract class BaseControllerPlayer extends BasePlayer {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (mIgnoreAllEvent) {
-            hideAllWidget();
             cancelDismissControlViewTimer();
             cancelProgressTimer();
             return super.onTouchEvent(event);
@@ -693,7 +693,7 @@ public abstract class BaseControllerPlayer extends BasePlayer {
             mChangePosition = false;
         }
 
-        if (isLiveStream) {
+        if (isLiveStream || isForbidChangePosition) {
             mChangePosition = false;
         }
 
@@ -976,6 +976,15 @@ public abstract class BaseControllerPlayer extends BasePlayer {
      */
     public void setForbidAdjustBrightness(boolean forbidAdjustBrightness) {
         isForbidAdjustBrightness = forbidAdjustBrightness;
+    }
+
+    /**
+     * 禁用进度调节
+     *
+     * @param forbidChangePosition
+     */
+    public void setForbidChangePosition(boolean forbidChangePosition) {
+        isForbidChangePosition = forbidChangePosition;
     }
 
     public void setTouchWiget(boolean touchWiget) {

@@ -245,6 +245,15 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
         this.isLiveStream = isLiveStream;
     }
 
+    /**
+     * @param decoderType 解码器类型。0代表硬件解码器；1代表软件解码器。
+     */
+    public void setDefaultDecoder(int decoderType) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setDefaultDecoder(decoderType);
+        }
+    }
+
     public void pause() {
         if (mMediaPlayer != null) {
             mMediaPlayer.pause();

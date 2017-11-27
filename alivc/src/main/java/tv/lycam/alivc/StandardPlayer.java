@@ -341,7 +341,7 @@ public class StandardPlayer extends BaseControllerPlayer {
     }
 
     @Override
-    protected void onClickUiToggle() {
+    public void onClickUiToggle() {
 //        if (mIfCurrentIsFullscreen && mLockCurScreen && mNeedLockFull) {
 //            setViewShowState(mLockScreen, VISIBLE);
 //            return;
@@ -461,7 +461,7 @@ public class StandardPlayer extends BaseControllerPlayer {
     }
 
     @Override
-    protected void hideAllWidget() {
+    public void hideAllWidget() {
         setViewShowState(mBottomContainer, INVISIBLE);
         setViewShowState(mTopContainerViewLayout, INVISIBLE);
     }
