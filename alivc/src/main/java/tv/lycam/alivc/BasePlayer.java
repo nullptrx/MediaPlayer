@@ -184,6 +184,10 @@ public abstract class BasePlayer extends AbstractPlayer {
         prepareAndPlay();
     }
 
+    public void stop() {
+        super.stop();
+    }
+
     @Override
     public void destroy() {
         stop();
@@ -192,5 +196,15 @@ public abstract class BasePlayer extends AbstractPlayer {
 
     public boolean isLiveMode() {
         return isLiveStream;
+    }
+
+    public void setMute(boolean mute) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setMuteMode(mute);
+        }
+    }
+
+    public String getVideoPath() {
+        return mStreamUrl;
     }
 }

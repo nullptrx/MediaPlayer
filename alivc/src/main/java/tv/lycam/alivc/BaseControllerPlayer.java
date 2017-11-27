@@ -131,6 +131,9 @@ public abstract class BaseControllerPlayer extends BasePlayer {
     //是否支持全屏滑动触摸有效
     protected boolean mIsTouchWigetFull = true;
 
+    // 忽略所有touch事件
+    private boolean mIgnoreAllEvent = false;
+
     public BaseControllerPlayer(@NonNull Context context) {
         super(context);
     }
@@ -607,6 +610,12 @@ public abstract class BaseControllerPlayer extends BasePlayer {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (mIgnoreAllEvent) {
+            hideAllWidget();
+            cancelDismissControlViewTimer();
+            cancelProgressTimer();
+            return super.onTouchEvent(event);
+        }
         float x = event.getX();
         float y = event.getY();
 
@@ -979,5 +988,14 @@ public abstract class BaseControllerPlayer extends BasePlayer {
 
     public void setNeedShowWifiTip(boolean needShowWifiTip) {
         mNeedShowWifiTip = needShowWifiTip;
+    }
+
+    /**
+     * 忽略所有touch事件
+     *
+     * @param ignoreAllEvent
+     */
+    public void setIgnoreAllEvent(boolean ignoreAllEvent) {
+        mIgnoreAllEvent = ignoreAllEvent;
     }
 }

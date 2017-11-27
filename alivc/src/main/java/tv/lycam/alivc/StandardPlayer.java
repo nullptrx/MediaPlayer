@@ -190,7 +190,7 @@ public class StandardPlayer extends BaseControllerPlayer {
     @Override
     protected void showProgressDialog(float deltaX, String seekTime, int seekTimePosition, String totalTime, int totalTimeDuration) {
         if (mProgressDialog == null) {
-            View localView = LayoutInflater.from(mContext).inflate(R.layout.video_progress_dialog, null);
+            View localView = LayoutInflater.from(mContext).inflate(R.layout.video_progress_dialog, null, false);
             mDialogProgressBar = ((ProgressBar) localView.findViewById(R.id.duration_progressbar));
             if (mDialogProgressBarDrawable != null) {
                 mDialogProgressBar.setProgressDrawable(mDialogProgressBarDrawable);
@@ -200,25 +200,28 @@ public class StandardPlayer extends BaseControllerPlayer {
             mDialogIcon = ((ImageView) localView.findViewById(R.id.duration_image_tip));
             mProgressDialog = new Dialog(mContext, R.style.video_style_dialog_progress);
             mProgressDialog.setContentView(localView);
-            mProgressDialog.getWindow().addFlags(Window.FEATURE_ACTION_BAR);
-            mProgressDialog.getWindow().addFlags(32);
-            mProgressDialog.getWindow().addFlags(16);
-            mProgressDialog.getWindow().setLayout(getWidth(), getHeight());
-            if (mDialogProgressNormalColor != -11) {
-                mDialogTotalTime.setTextColor(mDialogProgressNormalColor);
+            Window window = mProgressDialog.getWindow();
+            if (window != null) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                window.setLayout(getWidth(), getHeight());
+                if (mDialogProgressNormalColor != -11) {
+                    mDialogTotalTime.setTextColor(mDialogProgressNormalColor);
+                }
+                if (mDialogProgressHighLightColor != -11) {
+                    mDialogSeekTime.setTextColor(mDialogProgressHighLightColor);
+                }
+                WindowManager.LayoutParams localLayoutParams = window.getAttributes();
+                localLayoutParams.gravity = Gravity.TOP;
+                localLayoutParams.width = getWidth();
+                localLayoutParams.height = getHeight();
+                int location[] = new int[2];
+                getLocationOnScreen(location);
+                localLayoutParams.x = location[0];
+                localLayoutParams.y = location[1];
+                window.setAttributes(localLayoutParams);
             }
-            if (mDialogProgressHighLightColor != -11) {
-                mDialogSeekTime.setTextColor(mDialogProgressHighLightColor);
-            }
-            WindowManager.LayoutParams localLayoutParams = mProgressDialog.getWindow().getAttributes();
-            localLayoutParams.gravity = Gravity.TOP;
-            localLayoutParams.width = getWidth();
-            localLayoutParams.height = getHeight();
-            int location[] = new int[2];
-            getLocationOnScreen(location);
-            localLayoutParams.x = location[0];
-            localLayoutParams.y = location[1];
-            mProgressDialog.getWindow().setAttributes(localLayoutParams);
         }
         if (!mProgressDialog.isShowing()) {
             mProgressDialog.show();
@@ -256,19 +259,22 @@ public class StandardPlayer extends BaseControllerPlayer {
             }
             mVolumeDialog = new Dialog(mContext, R.style.video_style_dialog_progress);
             mVolumeDialog.setContentView(localView);
-            mVolumeDialog.getWindow().addFlags(8);
-            mVolumeDialog.getWindow().addFlags(32);
-            mVolumeDialog.getWindow().addFlags(16);
-            mVolumeDialog.getWindow().setLayout(-2, -2);
-            WindowManager.LayoutParams localLayoutParams = mVolumeDialog.getWindow().getAttributes();
-            localLayoutParams.gravity = Gravity.TOP | Gravity.LEFT;
-            localLayoutParams.width = getWidth();
-            localLayoutParams.height = getHeight();
-            int location[] = new int[2];
-            getLocationOnScreen(location);
-            localLayoutParams.x = location[0];
-            localLayoutParams.y = location[1];
-            mVolumeDialog.getWindow().setAttributes(localLayoutParams);
+            Window window = mVolumeDialog.getWindow();
+            if (window != null) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                window.setLayout(-2, -2);
+                WindowManager.LayoutParams localLayoutParams = window.getAttributes();
+                localLayoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+                localLayoutParams.width = getWidth();
+                localLayoutParams.height = getHeight();
+                int location[] = new int[2];
+                getLocationOnScreen(location);
+                localLayoutParams.x = location[0];
+                localLayoutParams.y = location[1];
+                window.setAttributes(localLayoutParams);
+            }
         }
         if (!mVolumeDialog.isShowing()) {
             mVolumeDialog.show();
@@ -295,19 +301,22 @@ public class StandardPlayer extends BaseControllerPlayer {
             mBrightnessDialogTv = (TextView) localView.findViewById(R.id.video_brightness);
             mBrightnessDialog = new Dialog(mContext, R.style.video_style_dialog_progress);
             mBrightnessDialog.setContentView(localView);
-            mBrightnessDialog.getWindow().addFlags(8);
-            mBrightnessDialog.getWindow().addFlags(32);
-            mBrightnessDialog.getWindow().addFlags(16);
-            mBrightnessDialog.getWindow().setLayout(-2, -2);
-            WindowManager.LayoutParams localLayoutParams = mBrightnessDialog.getWindow().getAttributes();
-            localLayoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
-            localLayoutParams.width = getWidth();
-            localLayoutParams.height = getHeight();
-            int location[] = new int[2];
-            getLocationOnScreen(location);
-            localLayoutParams.x = location[0];
-            localLayoutParams.y = location[1];
-            mBrightnessDialog.getWindow().setAttributes(localLayoutParams);
+            Window window = mBrightnessDialog.getWindow();
+            if (window != null) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL);
+                window.addFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                window.setLayout(-2, -2);
+                WindowManager.LayoutParams localLayoutParams = window.getAttributes();
+                localLayoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+                localLayoutParams.width = getWidth();
+                localLayoutParams.height = getHeight();
+                int location[] = new int[2];
+                getLocationOnScreen(location);
+                localLayoutParams.x = location[0];
+                localLayoutParams.y = location[1];
+                window.setAttributes(localLayoutParams);
+            }
         }
         if (!mBrightnessDialog.isShowing()) {
             mBrightnessDialog.show();
@@ -597,13 +606,15 @@ public class StandardPlayer extends BaseControllerPlayer {
     }
 
     private void showStatusBar() {
-        setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        if (!mIsPortrait) {
+            setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
+        }
     }
 
     private void hideStatusBar() {
-        setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_FULLSCREEN);
+        if (!mIsPortrait) {
+            setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+        }
     }
 
 }
