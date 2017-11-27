@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -46,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
 //        mPlayer.setTopContainerView(view);
         //设置旋转
         orientationUtils = new OrientationUtils(this);
-        mPlayer.setVideoPath(DEFAULT_TEST_URL_VOD, false);
+        mPlayer.setVideoPath(DEFAULT_TEST_URL_LIVE);
         mPlayer.start();
         netWatchdog = new NetWatchdog(this);
         netWatchdog.setNetChangeListener(new NetWatchdog.NetChangeListener() {
@@ -120,16 +121,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void grant(View v) {
-        mPlayer.setVideoPath(mPlayer.isLiveMode() ? DEFAULT_TEST_URL_VOD : DEFAULT_TEST_URL_LIVE);
-        mPlayer.start();
-//        orientationUtils.resolveByClick();
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-//            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
-//            intent.setData(Uri.parse("package:" + getPackageName()));
-//            startActivityForResult(intent, REQUEST_CODE_WRITE_SETTINGS);
-//        }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, REQUEST_CODE_WRITE_SETTINGS);
+        }
+    }
+
+    public void fullscreen(View v) {
+        orientationUtils.resolveByClick();
         mSystemUiVisibility = getWindow().getDecorView().getSystemUiVisibility();
         CommonUtil.hideNavKey(this);
+    }
+
+    public void switchsource(View v) {
+        mPlayer.setVideoPath(mPlayer.isLiveMode() ? DEFAULT_TEST_URL_VOD : DEFAULT_TEST_URL_LIVE);
+        mPlayer.start();
     }
 
     int mTransformSize;

@@ -11,16 +11,30 @@
     <tv.lycam.alivc.StandardPlayer
         android:id="@+id/player"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="#000"/>
 
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="grant"
         android:text="授权"/>
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="transform"
         android:text="变换"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="fullscreen"
+        android:text="切换全屏"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="switchsource"
+        android:text="视频源"/>
 </LinearLayout>

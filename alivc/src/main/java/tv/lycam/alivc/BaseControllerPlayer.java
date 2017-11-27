@@ -32,7 +32,7 @@ import tv.lycam.alivc.utils.CommonUtil;
 public abstract class BaseControllerPlayer extends BasePlayer {
     // 常量
     private static final int ROOT_LAYOUT_ID = R.layout.lycam_player_alivc;
-    private static final int SURFACE_ID = R.id.lycam_player_surface;
+    private static final int SURFACE_ID = R.id.lycam_player_surface_container;
     private static final int IC_MEDIA_PAUSE_ID = R.drawable.lycam_player_media_pause;
     private static final int IC_MEDIA_START_ID = R.drawable.lycam_player_media_start;
     private static final int IC_MEDIA_STOP_ID = R.drawable.lycam_player_media_stop;

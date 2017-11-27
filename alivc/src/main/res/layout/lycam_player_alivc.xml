@@ -4,10 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextureView
-        android:id="@id/lycam_player_surface"
+    <RelativeLayout
+        android:id="@id/lycam_player_surface_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:gravity="center">
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:id="@id/lycam_player_thumb"
@@ -51,6 +54,7 @@
             android:id="@+id/lycam_player_layout_progress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
             android:orientation="horizontal">
 
             <TextView
@@ -69,7 +73,7 @@
                 android:id="@id/lycam_player_progress"
                 style="@style/SeekBarAppTheme_White"
                 android:layout_width="0dip"
-                android:layout_height="32dip"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"/>
 

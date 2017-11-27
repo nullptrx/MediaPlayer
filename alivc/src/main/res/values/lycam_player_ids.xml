@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <item name="lycam_player_surface" type="id"/>
+    <!--<item name="lycam_player_surface" type="id"/>-->
     <item name="lycam_player_layout_bottom" type="id"/>
     <item name="lycam_player_layout_top" type="id"/>
     <!--<item name="lycam_player_play" type="id"/>-->
@@ -10,5 +10,6 @@
     <item name="lycam_player_progress" type="id"/>
     <item name="lycam_player_loading" type="id"/>
     <item name="lycam_player_thumb" type="id"/>
+    <item name="lycam_player_surface_container" type="id"/>
     <!--<item name="lycam_player_pldroid" type="layout"/>-->
 </resources>

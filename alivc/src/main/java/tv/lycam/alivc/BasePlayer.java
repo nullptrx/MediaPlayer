@@ -1,23 +1,16 @@
 package tv.lycam.alivc;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.KeyEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.WindowManager;
 
 import com.alivc.player.MediaPlayer;
 
 import java.util.regex.Pattern;
 
 import tv.lycam.alivc.utils.AudioMngHelper;
-import tv.lycam.alivc.utils.CommonUtil;
 
 
 /**
@@ -86,49 +79,6 @@ public abstract class BasePlayer extends AbstractPlayer {
             mMediaPlayer.setVideoScalingMode(scalingMode);
         }
         return this;
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        int orientation = getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {                //转为竖屏了。
-            //显示状态栏
-            Activity activity = CommonUtil.getActivityContext(mContext);
-            if (activity != null) {
-                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            }
-            mTextureView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
-
-            //设置view的布局，宽高之类
-            ViewGroup.LayoutParams surfaceViewLayoutParams = mTextureView.getLayoutParams();
-            surfaceViewLayoutParams.height = (int) (getWight(mContext) * 9.0f / 16);
-            surfaceViewLayoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-
-        } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {                //转到横屏了。
-            //隐藏状态栏
-            Activity activity = CommonUtil.getActivityContext(mContext);
-            if (activity != null) {
-                activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            }
-            mTextureView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN);
-            //设置view的布局，宽高
-            ViewGroup.LayoutParams surfaceViewLayoutParams = mTextureView.getLayoutParams();
-            surfaceViewLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
-            surfaceViewLayoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
-
-        }
-    }
-
-    public static int getWight(Context context) {
-        DisplayMetrics dm = new DisplayMetrics();
-        Activity activity = CommonUtil.getActivityContext(context);
-        if (activity != null) {
-            activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
-        }
-        int screenWidth = dm.widthPixels;
-        return screenWidth;
     }
 
     public boolean onVolumeKeyDown(int keyCode) {

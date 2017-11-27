@@ -2,19 +2,29 @@ package tv.lycam.alivc;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.InflateException;
 import android.view.Surface;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import com.alivc.player.AliVcMediaPlayer;
 import com.alivc.player.MediaPlayer;
@@ -49,7 +59,9 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
     //屏幕高度
     protected int mScreenHeight;
     // 界面
-    protected TextureView mTextureView;
+    private TextureView mTextureView;
+    private SurfaceView mSurfaceView;
+    private ViewGroup mSurfaceContainer;
 
     protected AliVcMediaPlayer mMediaPlayer;
 
@@ -80,6 +92,57 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
         init(context);
     }
 
+    private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
+        @Override
+        public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
+            if (mMediaPlayer != null) {
+                Surface surface = new Surface(surfaceTexture);
+                mMediaPlayer.setVideoSurface(surface);
+                surface.release();
+            }
+            resolveTransform();
+        }
+
+        @Override
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) {
+            if (mMediaPlayer != null) {
+                mMediaPlayer.setSurfaceChanged();
+            }
+            resolveTransform();
+        }
+
+        @Override
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
+            return true;
+        }
+
+        @Override
+        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+            resolveTransform();
+        }
+    };
+
+    private SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
+        @Override
+        public void surfaceCreated(SurfaceHolder holder) {
+            holder.setKeepScreenOn(true);
+            if (mMediaPlayer != null) {
+                mMediaPlayer.setVideoSurface(holder.getSurface());
+            }
+        }
+
+        @Override
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            if (mMediaPlayer != null) {
+                mMediaPlayer.setSurfaceChanged();
+            }
+        }
+
+        @Override
+        public void surfaceDestroyed(SurfaceHolder holder) {
+        }
+    };
+
     protected void init(Context context) {
         this.mContext = context;
         initInflate(mContext);
@@ -91,44 +154,58 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
         if (activity != null) {
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
-        mTextureView = findViewById(getPlayerId());
-        if (mTextureView == null) {
-            throw new InflateException("The layout has not include PLVideoTextureView!");
+        mSurfaceContainer = findViewById(getPlayerId());
+
+        if (mSurfaceContainer == null) {
+            throw new InflateException("The layout has not include player Container!");
         }
-        mTextureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
-                if (mMediaPlayer == null) {
-
-                } else {
-                    Surface surfaces = new Surface(surface);
-                    mMediaPlayer.setVideoSurface(surfaces);
-                    surfaces.release();
-                }
-                resolveTransform();
-            }
-
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
-                if (mMediaPlayer != null) {
-                    mMediaPlayer.setSurfaceChanged();
-                }
-                resolveTransform();
-            }
-
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-                return true;
-            }
-
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surface) {
-
-            }
-        });
+//        if (mTextureView != null) {
+//            mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+//            mTextureView.setLayerType(TextureView.LAYER_TYPE_SOFTWARE, null);
+//        } else if (mSurfaceView != null) {
+//            mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
+//        }
+        addTextureView();
+//        addSurfaceView();
         initVodPlayer(mContext);
 
         setStateAndUi(PlayerState.CURRENT_STATE_NORMAL);
+    }
+
+    private void addTextureView() {
+        if (mSurfaceContainer.getChildCount() > 0) {
+            mSurfaceContainer.removeAllViews();
+        }
+        mTextureView = new TextureView(mContext);
+        mTextureView.setLayerType(TextureView.LAYER_TYPE_SOFTWARE, null);
+        mTextureView.setSurfaceTextureListener(mSurfaceTextureListener);
+        if (mSurfaceContainer instanceof RelativeLayout) {
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            mSurfaceContainer.addView(mTextureView, layoutParams);
+        } else if (mSurfaceContainer instanceof FrameLayout) {
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            layoutParams.gravity = Gravity.CENTER;
+            mSurfaceContainer.addView(mTextureView, layoutParams);
+        }
+    }
+
+    private void addSurfaceView() {
+        if (mSurfaceContainer.getChildCount() > 0) {
+            mSurfaceContainer.removeAllViews();
+        }
+        mSurfaceView = new SurfaceView(mContext);
+        mSurfaceView.setLayerType(TextureView.LAYER_TYPE_SOFTWARE, null);
+        mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
+        if (mSurfaceContainer instanceof RelativeLayout) {
+            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
+            mSurfaceContainer.addView(mSurfaceView, layoutParams);
+        } else if (mSurfaceContainer instanceof FrameLayout) {
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            layoutParams.gravity = Gravity.CENTER;
+            mSurfaceContainer.addView(mSurfaceView, layoutParams);
+        }
     }
 
     /**
@@ -136,6 +213,9 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
      * 注意，暂停时
      */
     protected void resolveTransform() {
+        if (mTextureView == null) {
+            return;
+        }
         switch (mTransformSize) {
             case 1: {
                 Matrix transform = new Matrix();
@@ -191,11 +271,15 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
 
     private void initVodPlayer(Context context) {
         // 经测试，此处的textureid可随意数字，原因尚不知。
-        SurfaceTexture surfaceTexture = new SurfaceTexture(createTextureID());
-        Surface surface = new Surface(surfaceTexture);
-        mMediaPlayer = new AliVcMediaPlayer(context, surface);
-        surface.release();
-        surfaceTexture.release();
+        if (mTextureView != null) {
+            SurfaceTexture surfaceTexture = new SurfaceTexture(createTextureID());
+            Surface surface = new Surface(surfaceTexture);
+            mMediaPlayer = new AliVcMediaPlayer(context, surface);
+            surface.release();
+            surfaceTexture.release();
+        } else {
+            mMediaPlayer = new AliVcMediaPlayer(context, mSurfaceView);
+        }
 
         //音频数据回调接口，在需要处理音频时使用，如拿到视频音频，然后绘制音柱。
         mMediaPlayer.setPcmDataListener(new MediaPlayer.MediaPlayerPcmDataListener() {
@@ -488,4 +572,110 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
     protected void setStateAndUi(int state) {
         mCurrentState = state;
     }
+
+    private int stateToSave;
+
+    @Override
+    public Parcelable onSaveInstanceState() {
+        //begin boilerplate code that allows parent classes to save state
+        Parcelable superState = super.onSaveInstanceState();
+
+        SavedState ss = new SavedState(superState);
+        //end
+
+        ss.stateToSave = this.stateToSave;
+
+        return ss;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        //begin boilerplate code so parent classes can restore state
+        if (!(state instanceof SavedState)) {
+            super.onRestoreInstanceState(state);
+            return;
+        }
+
+        SavedState ss = (SavedState) state;
+        super.onRestoreInstanceState(ss.getSuperState());
+        //end
+
+        this.stateToSave = ss.stateToSave;
+    }
+
+    static class SavedState extends BaseSavedState {
+        int stateToSave;
+
+        SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        private SavedState(Parcel in) {
+            super(in);
+            this.stateToSave = in.readInt();
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(this.stateToSave);
+        }
+
+        //required field that makes Parcelables from a Parcel
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+                    public SavedState createFromParcel(Parcel in) {
+                        return new SavedState(in);
+                    }
+
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                };
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        addTextureView();
+        int orientation = getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {                //转为竖屏了。
+            //显示状态栏
+            Activity activity = CommonUtil.getActivityContext(mContext);
+            if (activity != null) {
+                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            }
+            mTextureView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+
+            //设置view的布局，宽高之类
+            ViewGroup.LayoutParams surfaceViewLayoutParams = getLayoutParams();
+            surfaceViewLayoutParams.height = (int) (getWight(mContext) * 9.0f / 16);
+            surfaceViewLayoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+
+        } else if (orientation == Configuration.ORIENTATION_LANDSCAPE) {                //转到横屏了。
+            //隐藏状态栏
+            Activity activity = CommonUtil.getActivityContext(mContext);
+            if (activity != null) {
+                activity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            }
+            mTextureView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN);
+            //设置view的布局，宽高
+            ViewGroup.LayoutParams surfaceViewLayoutParams = getLayoutParams();
+            surfaceViewLayoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+            surfaceViewLayoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+
+        }
+    }
+
+    public static int getWight(Context context) {
+        DisplayMetrics dm = new DisplayMetrics();
+        Activity activity = CommonUtil.getActivityContext(context);
+        if (activity != null) {
+            activity.getWindowManager().getDefaultDisplay().getMetrics(dm);
+        }
+        int screenWidth = dm.widthPixels;
+        return screenWidth;
+    }
+
 }
