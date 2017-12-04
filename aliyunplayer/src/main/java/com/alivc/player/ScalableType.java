@@ -26,5 +26,7 @@ public enum ScalableType {
     RIGHT_BOTTOM_CROP,
     START_INSIDE,
     CENTER_INSIDE,
-    END_INSIDE
+    END_INSIDE,
+    REVERSE_HORIZONTAL,
+    REVERSE_VERTICAL,
 }

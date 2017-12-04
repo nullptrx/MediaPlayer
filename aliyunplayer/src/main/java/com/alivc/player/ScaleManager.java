@@ -65,6 +65,10 @@ public class ScaleManager {
                 return centerInside();
             case END_INSIDE:
                 return endInside();
+            case REVERSE_HORIZONTAL:
+                return reverseHorizontal();
+            case REVERSE_VERTICAL:
+                return reverseVertical();
             default:
                 return null;
         }
@@ -96,6 +100,10 @@ public class ScaleManager {
                 return getMatrix(sx, sy, (float) this.mViewSize.getWidth(), ((float) this.mViewSize.getHeight()) / 2.0f);
             case RIGHT_BOTTOM:
                 return getMatrix(sx, sy, (float) this.mViewSize.getWidth(), (float) this.mViewSize.getHeight());
+            case REVERSE_HORIZONTAL:
+                return getMatrix(-1, 1, this.mViewSize.getWidth() / 2, 0);
+            case REVERSE_VERTICAL:
+                return getMatrix(1, -1, 0, this.mViewSize.getHeight() / 2);
             default:
                 throw new IllegalArgumentException("Illegal PivotPoint");
         }
@@ -158,5 +166,13 @@ public class ScaleManager {
             return fitEnd();
         }
         return getOriginalScale(PivotPoint.RIGHT_BOTTOM);
+    }
+
+    private Matrix reverseHorizontal() {
+        return getOriginalScale(PivotPoint.REVERSE_HORIZONTAL);
+    }
+
+    private Matrix reverseVertical() {
+        return getOriginalScale(PivotPoint.REVERSE_VERTICAL);
     }
 }

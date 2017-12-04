@@ -26,6 +26,9 @@ import android.widget.RelativeLayout;
 
 import com.alivc.player.AliVcMediaPlayer;
 import com.alivc.player.MediaPlayer;
+import com.alivc.player.ScalableType;
+import com.alivc.player.ScaleManager;
+import com.alivc.player.Size;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -67,11 +70,13 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
     // 备份缓存前的播放状态
     protected int mBackUpPlayingBufferState = -1;
     // 变换
-    private int mTransformSize = 0;
+    private ScalableType mScalableType = ScalableType.NONE;
     // 是否直播流
     protected boolean isLiveStream;
     // 是否自动配置常亮属性
     private boolean isAutoKeepScreen = true;
+
+    private ScaleManager mScaleManager;
 
 
     public AbstractPlayer(@NonNull Context context) {
@@ -109,6 +114,11 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
                 mMediaPlayer.setVideoSurface(surface);
                 surface.release();
             }
+            int vWidth = getWidth();
+            int vHeight = getHeight();
+            Size viewSize = new Size(vWidth, vHeight);
+            Size videoSize = new Size(width, height);
+            mScaleManager = new ScaleManager(viewSize, videoSize);
             resolveTransform();
         }
 
@@ -138,10 +148,7 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
             return;
         mScreenWidth = context.getResources().getDisplayMetrics().widthPixels;
         mScreenHeight = context.getResources().getDisplayMetrics().heightPixels;
-        Activity activity = CommonUtil.getActivityContext(context);
-        if (activity != null) {
-            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        }
+
         mSurfaceContainer = findViewById(getPlayerId());
 
         if (mSurfaceContainer == null) {
@@ -186,39 +193,18 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
         if (mTextureView == null) {
             return;
         }
-        switch (mTransformSize) {
-            case 1: {
-                Matrix transform = new Matrix();
-                transform.setScale(-1, 1, mTextureView.getWidth() / 2, 0);
-                mTextureView.setTransform(transform);
-//                mChangeTransform.setText("左右镜像");
-                mTextureView.invalidate();
-            }
-            break;
-            case 2: {
-                Matrix transform = new Matrix();
-                transform.setScale(1, -1, 0, mTextureView.getHeight() / 2);
-                mTextureView.setTransform(transform);
-//                mChangeTransform.setText("上下镜像");
-                mTextureView.invalidate();
-            }
-            break;
-            case 0: {
-                Matrix transform = new Matrix();
-                transform.setScale(1, 1, mTextureView.getWidth() / 2, 0);
-                mTextureView.setTransform(transform);
-//                mChangeTransform.setText("旋转镜像");
-                mTextureView.invalidate();
-            }
-            break;
+        if (mScaleManager != null) {
+            Matrix scaleMatrix = mScaleManager.getScaleMatrix(mScalableType);
+            mTextureView.setTransform(scaleMatrix);
+            mTextureView.invalidate();
         }
     }
 
-    public void setmTransformSize(int transformSize) {
+    public void setScalableType(ScalableType scalableType) {
         if (mCurrentState == PlayerState.CURRENT_STATE_NORMAL) {
             return;
         }
-        this.mTransformSize = transformSize;
+        this.mScalableType = scalableType;
         resolveTransform();
     }
 

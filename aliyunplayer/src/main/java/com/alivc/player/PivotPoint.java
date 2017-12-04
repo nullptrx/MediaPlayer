@@ -9,5 +9,7 @@ public enum PivotPoint {
     CENTER_BOTTOM,
     RIGHT_TOP,
     RIGHT_CENTER,
-    RIGHT_BOTTOM
+    RIGHT_BOTTOM,
+    REVERSE_HORIZONTAL,
+    REVERSE_VERTICAL,
 }

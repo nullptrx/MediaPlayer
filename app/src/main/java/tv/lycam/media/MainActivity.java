@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.alivc.player.ScalableType;
+
 import tv.lycam.alivc.PlayerState;
 import tv.lycam.alivc.StandardPlayer;
 import tv.lycam.alivc.utils.CommonUtil;
@@ -142,17 +144,8 @@ public class MainActivity extends AppCompatActivity {
     int mTransformSize;
 
     public void transform(View view) {
-       /* if (mTransformSize == 0) {
-            mTransformSize = 1;
-        } else if (mTransformSize == 1) {
-            mTransformSize = 2;
-        } else */
-        if (mTransformSize == 2) {
-            mTransformSize = 0;
-        } else {
-            mTransformSize = 2;
-        }
-        mPlayer.setmTransformSize(mTransformSize);
+        mPlayer.setScalableType(mTransformSize % 2 == 0 ? ScalableType.NONE : ScalableType.REVERSE_HORIZONTAL);
+        mTransformSize++;
     }
 
     @Override
