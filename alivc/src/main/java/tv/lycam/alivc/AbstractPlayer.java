@@ -17,8 +17,6 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.InflateException;
 import android.view.Surface;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -60,7 +58,6 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
     protected int mScreenHeight;
     // 界面
     private TextureView mTextureView;
-    private SurfaceView mSurfaceView;
     private ViewGroup mSurfaceContainer;
 
     protected AliVcMediaPlayer mMediaPlayer;
@@ -124,27 +121,6 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
         }
     };
 
-    private SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
-        @Override
-        public void surfaceCreated(SurfaceHolder holder) {
-            holder.setKeepScreenOn(true);
-            if (mMediaPlayer != null) {
-                mMediaPlayer.setVideoSurface(holder.getSurface());
-            }
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-            if (mMediaPlayer != null) {
-                mMediaPlayer.setSurfaceChanged();
-            }
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder holder) {
-        }
-    };
-
     protected void init(Context context) {
         this.mContext = context;
         initInflate(mContext);
@@ -189,24 +165,6 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
             FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             layoutParams.gravity = Gravity.CENTER;
             mSurfaceContainer.addView(mTextureView, layoutParams);
-        }
-    }
-
-    private void addSurfaceView() {
-        if (mSurfaceContainer.getChildCount() > 0) {
-            mSurfaceContainer.removeAllViews();
-        }
-        mSurfaceView = new SurfaceView(mContext);
-        mSurfaceView.setLayerType(TextureView.LAYER_TYPE_SOFTWARE, null);
-        mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
-        if (mSurfaceContainer instanceof RelativeLayout) {
-            RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            layoutParams.addRule(RelativeLayout.CENTER_IN_PARENT);
-            mSurfaceContainer.addView(mSurfaceView, layoutParams);
-        } else if (mSurfaceContainer instanceof FrameLayout) {
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-            layoutParams.gravity = Gravity.CENTER;
-            mSurfaceContainer.addView(mSurfaceView, layoutParams);
         }
     }
 
@@ -273,15 +231,11 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
 
     private void initVodPlayer(Context context) {
         // 经测试，此处的textureid可随意数字，原因尚不知。
-        if (mTextureView != null) {
-            SurfaceTexture surfaceTexture = new SurfaceTexture(createTextureID());
-            Surface surface = new Surface(surfaceTexture);
-            mMediaPlayer = new AliVcMediaPlayer(context, surface);
-            surface.release();
-            surfaceTexture.release();
-        } else {
-            mMediaPlayer = new AliVcMediaPlayer(context, mSurfaceView);
-        }
+        SurfaceTexture surfaceTexture = new SurfaceTexture(createTextureID());
+        Surface surface = new Surface(surfaceTexture);
+        mMediaPlayer = new AliVcMediaPlayer(context, surface);
+        surface.release();
+        surfaceTexture.release();
 
         //音频数据回调接口，在需要处理音频时使用，如拿到视频音频，然后绘制音柱。
         mMediaPlayer.setPcmDataListener(new MediaPlayer.MediaPlayerPcmDataListener() {

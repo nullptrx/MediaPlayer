@@ -1,5 +1,6 @@
 package com.alivc.player.logreport;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -8,8 +9,9 @@ import android.telephony.TelephonyManager;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.WindowManager;
-import com.alivc.player.HttpClientUtil;
+
 import com.alivc.player.VcPlayerLog;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,16 +45,19 @@ public class EventUtils {
     }
 
     public static String getNetWorkType(Context context) {
-        NetworkInfo networkInfo = ((ConnectivityManager) context.getApplicationContext().getSystemService("connectivity")).getActiveNetworkInfo();
-        if (networkInfo == null) {
-            return "";
-        }
-        int nType = networkInfo.getType();
-        if (nType == 0) {
-            return "cellnetwork";
-        }
-        if (nType == 1) {
-            return "WiFi";
+        ConnectivityManager service = (ConnectivityManager) context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (service != null) {
+            NetworkInfo networkInfo = service.getActiveNetworkInfo();
+            if (networkInfo == null) {
+                return "";
+            }
+            int nType = networkInfo.getType();
+            if (nType == 0) {
+                return "cellnetwork";
+            }
+            if (nType == 1) {
+                return "WiFi";
+            }
         }
         return "";
     }
@@ -65,7 +70,7 @@ public class EventUtils {
                 Enumeration<InetAddress> en_ip = ((NetworkInterface) en_netInterface.nextElement()).getInetAddresses();
                 while (en_ip.hasMoreElements()) {
                     inetAddress = (InetAddress) en_ip.nextElement();
-                    if (!inetAddress.isLoopbackAddress() && inetAddress.getHostAddress().indexOf(":") == -1) {
+                    if (!inetAddress.isLoopbackAddress() && !inetAddress.getHostAddress().contains(":")) {
                         break;
                     }
                     inetAddress = null;
@@ -97,15 +102,18 @@ public class EventUtils {
             return isPad;
         }
         try {
-            Display display = ((WindowManager) context.getApplicationContext().getSystemService("window")).getDefaultDisplay();
-            DisplayMetrics dm = new DisplayMetrics();
-            display.getMetrics(dm);
-            if (Math.sqrt(Math.pow((double) (((float) dm.widthPixels) / dm.xdpi), 2.0d) + Math.pow((double) (((float) dm.heightPixels) / dm.ydpi), 2.0d)) >= 6.0d) {
-                isPad = true;
-            } else {
-                isPad = false;
+            WindowManager service = (WindowManager) context.getApplicationContext().getSystemService(Context.WINDOW_SERVICE);
+            if (service != null) {
+                Display display = service.getDefaultDisplay();
+                DisplayMetrics dm = new DisplayMetrics();
+                display.getMetrics(dm);
+                if (Math.sqrt(Math.pow((double) (((float) dm.widthPixels) / dm.xdpi), 2.0d) + Math.pow((double) (((float) dm.heightPixels) / dm.ydpi), 2.0d)) >= 6.0d) {
+                    isPad = true;
+                } else {
+                    isPad = false;
+                }
+                isPadDecied = true;
             }
-            isPadDecied = true;
             return isPad;
         } catch (Exception e) {
             VcPlayerLog.e("isPad", "get window service failed :" + e.getMessage());
@@ -113,9 +121,10 @@ public class EventUtils {
         }
     }
 
+    @SuppressLint("HardwareIds")
     public static String createUuid(Context context) {
         try {
-            TelephonyManager tm = (TelephonyManager) context.getApplicationContext().getSystemService("phone");
+            TelephonyManager tm = (TelephonyManager) context.getApplicationContext().getSystemService(Context.TELEPHONY_SERVICE);
             return new UUID((long) ("" + Secure.getString(context.getContentResolver(), "android_id")).hashCode(), (((long) ("" + tm.getDeviceId()).hashCode()) << 32) | ((long) ("" + tm.getSimSerialNumber()).hashCode())).toString();
         } catch (Exception e) {
             VcPlayerLog.e("CreateUuid", "failed " + e.getMessage());
@@ -181,14 +190,14 @@ public class EventUtils {
 
     public static void sendUrl(final String url) {
         VcPlayerLog.d(TAG, "usertrace : url = " + url);
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    HttpClientUtil.doHttpsGet(url);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+//        new Thread(new Runnable() {
+//            public void run() {
+//                try {
+//                    HttpClientUtil.doHttpsGet(url);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
     }
 }

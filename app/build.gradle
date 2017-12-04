@@ -19,7 +19,8 @@ android {
 
     repositories {
         flatDir {
-            dirs project(':alivc').file('libs'), 'libs'
+//            dirs project(':alivc').file('libs'), 'libs'
+            dirs 'libs'
         }
     }
 }

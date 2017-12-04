@@ -6,6 +6,9 @@ import android.os.Build;
 import android.os.Build.VERSION;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.aliyun.aliyunplayer.BuildConfig;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.UUID;
@@ -25,7 +28,8 @@ public class PublicPraram {
     private static String os_version = VERSION.RELEASE;
     private static String product = "player";
     private static String referer = "aliyun";
-    private static String reportHost = "https://videocloud.cn-hangzhou.log.aliyuncs.com/logstores/newplayer/track?APIVersion=0.6.0";
+    //    private static String reportHost = "https://videocloud.cn-hangzhou.log.aliyuncs.com/logstores/newplayer/track?APIVersion=0.6.0";
+    private static String reportHost = "https://127.0.0.1/logstores/newplayer/track?APIVersion=0.6.0";
     private static String terminal_type = "";
     private static String time = "";
     private static String user_account = "0";
@@ -121,8 +125,7 @@ public class PublicPraram {
         URL url = null;
         try {
             url = new URL(this.video_url);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        } catch (MalformedURLException ignored) {
         }
         if (url != null) {
             this.video_domain = url.getHost();
@@ -168,7 +171,9 @@ public class PublicPraram {
         finalSb.append("app_n=").append(EventUtils.urlEncode(application_name)).append("&");
         finalSb.append("cdn_ip=").append(EventUtils.urlEncode(this.cdn_ip)).append("&");
         finalSb.append("r=").append(EventUtils.urlEncode(referer));
-        Log.d(TAG, finalSb.toString());
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, finalSb.toString());
+        }
         return finalSb.toString();
     }
 
