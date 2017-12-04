@@ -75,6 +75,8 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
     private int mTransformSize = 0;
     // 是否直播流
     protected boolean isLiveStream;
+    // 是否自动配置常亮属性
+    private boolean isAutoKeepScreen = true;
 
 
     public AbstractPlayer(@NonNull Context context) {
@@ -363,17 +365,22 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
             mMediaPlayer.prepareAndPlay(mStreamUrl);
             setStateAndUi(PlayerState.CURRENT_STATE_PREPAREING);
         }
-        Activity activity = CommonUtil.getActivityContext(mContext);
-        if (activity != null) {
-            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (isAutoKeepScreen) {
+            Activity activity = CommonUtil.getActivityContext(mContext);
+            if (activity != null) {
+                activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
         }
     }
 
     protected void stop() {
-        Activity activity = CommonUtil.getActivityContext(mContext);
-        if (activity != null) {
-            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        if (isAutoKeepScreen) {
+            Activity activity = CommonUtil.getActivityContext(mContext);
+            if (activity != null) {
+                activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            }
         }
+
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
             setStateAndUi(PlayerState.CURRENT_STATE_NORMAL);
@@ -677,5 +684,14 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
             surfaceViewLayoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
 
         }
+    }
+
+    /**
+     * 播放时常亮，停止取消常亮，默认true
+     *
+     * @param autoKeepScreen
+     */
+    public void setAutoKeepScreen(boolean autoKeepScreen) {
+        isAutoKeepScreen = autoKeepScreen;
     }
 }

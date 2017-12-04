@@ -130,7 +130,9 @@ public abstract class BasePlayer extends AbstractPlayer {
     }
 
     public void start() {
-        mMediaPlayer.stop();
+        if(mMediaPlayer != null){
+            mMediaPlayer.stop();
+        }
         prepareAndPlay();
     }
 
