@@ -37,4 +37,7 @@ dependencies {
 
 //    api(name: 'AlivcPlayer', ext: 'aar')
     api project(':aliyunplayer')
+
+    implementation 'tv.danmaku.ijk.media:ijkplayer-java:0.8.4'
+
 }

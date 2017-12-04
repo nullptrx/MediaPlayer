@@ -22,11 +22,7 @@
             android:name=".MainActivity"
             android:configChanges="orientation|keyboard|locale|screenSize|layoutDirection|screenLayout"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
         </activity>
 
         <!--基础播放功能界面-->
@@ -45,6 +41,17 @@
             android:configChanges="orientation|keyboard|locale|screenSize|layoutDirection"
             android:label="@string/vod_basic_function"
             android:screenOrientation="portrait"/>
+        <activity
+            android:name=".Main2Activity"
+            android:configChanges="orientation|keyboard|locale|screenSize|layoutDirection"
+            android:label="ijk"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
         <!--高级功能界面-->
     </application>
