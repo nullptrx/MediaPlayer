@@ -1,7 +1,6 @@
 package com.alivc.player;
 
 import android.content.Context;
-
 import com.aliyun.aliyunplayer.R;
 
 public enum AliyunErrorCode {

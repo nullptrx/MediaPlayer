@@ -11,11 +11,40 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
 
-import com.aliyun.aliyunplayer.BuildConfig;
+import com.alivc.player.logreport.BufferEvent;
+import com.alivc.player.logreport.BufferEvent.BufferEventArgs;
+import com.alivc.player.logreport.BufferResumeEvent;
+import com.alivc.player.logreport.BufferResumeEvent.BufferResumeEventArgs;
+import com.alivc.player.logreport.BufferingToLocalEvent;
+import com.alivc.player.logreport.BufferingToLocalEvent.BufferingToLocalFinishArgs;
+import com.alivc.player.logreport.BufferingToLocalEvent.BufferingToLocalStartArgs;
+import com.alivc.player.logreport.DelayEvent;
+import com.alivc.player.logreport.DelayEvent.DelayEventArgs;
+import com.alivc.player.logreport.DownloadEvent;
+import com.alivc.player.logreport.DownloadEvent.DownloadEventArgs;
+import com.alivc.player.logreport.EOSEvent;
+import com.alivc.player.logreport.ErrorEvent;
+import com.alivc.player.logreport.ErrorEvent.ErrorEventArgs;
+import com.alivc.player.logreport.PauseEvent;
+import com.alivc.player.logreport.PauseResumeEvent;
+import com.alivc.player.logreport.PauseResumeEvent.PauseResumeEventArgs;
+import com.alivc.player.logreport.PlayEvent;
+import com.alivc.player.logreport.PlayEvent.DefinitionPlayMode;
+import com.alivc.player.logreport.PlayEvent.PlayEventArgs;
+import com.alivc.player.logreport.PublicPraram;
+import com.alivc.player.logreport.ReportEvent;
+import com.alivc.player.logreport.ReportEvent.ReportEventArgs;
+import com.alivc.player.logreport.SeekCompleteEvent;
+import com.alivc.player.logreport.SeekCompleteEvent.SeekCompleteEventArgs;
+import com.alivc.player.logreport.SeekEvent;
+import com.alivc.player.logreport.SeekEvent.SeekEventArgs;
+import com.alivc.player.logreport.StartPlayEvent;
+import com.alivc.player.logreport.StopEvent;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -37,6 +66,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AliVcMediaPlayer implements MediaPlayer {
+    public static final int AUTH_INTERVAL = 3000;
+    private static final int CMD_DESTROY = 5;
+    private static final int CMD_PAUSE = 4;
+    private static final int CMD_PLAY = 2;
+    private static final int CMD_PREPARE = 1;
+    private static final int CMD_PREPARE_AND_START = 8;
+    private static final int CMD_STOP = 3;
+    public static final boolean ENABLE_AUTH = false;
+    public static final boolean ENABLE_REPORT = false;
+    public static final int INFO_INTERVAL = 5000;
+    private static final int MAX_WAITE_COUNT = 5;
     private static final int PAUSE_BUFFERING_TIME = 30000;
     private static final String TAG = "AlivcPlayerJ";
     private static AtomicInteger WaiteForStartCount = new AtomicInteger(0);
@@ -58,11 +98,14 @@ public class AliVcMediaPlayer implements MediaPlayer {
     private MediaPlayerFrameInfoListener mFrameInfoListener;
     private Handler mHandler;
     private MediaPlayerInfoListener mInfoListener;
+    private boolean mIsPublicParamIncome;
     private String mKey;
+    private long mLastReportTime;
     private HandlerThread mMediaThread;
     private MediaPlayerPcmDataListener mPcmDataListener;
     private TBMPlayer mPlayer;
     private MediaPlayerPreparedListener mPreparedListener;
+    private long mReportIndex;
     private MediaPlayerSeekCompleteListener mSeekCompleteListener;
     private int mSeekPosition;
     private int mStatus;
@@ -72,6 +115,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
     private String mUrl;
     private VideoAdjust mVA;
     private MediaPlayerVideoSizeChangeListener mVideoSizeChangeListener;
+    private PublicPraram publicPraram;
 
     private static class MediaThreadHandler extends Handler {
         private WeakReference<AliVcMediaPlayer> weakPlayer;
@@ -91,24 +135,24 @@ public class AliVcMediaPlayer implements MediaPlayer {
     }
 
     enum PropertyName {
-        FLT_VIDEO_DECODE_FPS("dec-fps", MediaPlayer.PROP_DOUBLE_VIDEO_DECODE_FRAMES_PER_SECOND),
-        FLT_VIDEO_OUTPUT_FSP("out-fps", MediaPlayer.PROP_DOUBLE_VIDEO_OUTPUT_FRAMES_PER_SECOND),
+        FLT_VIDEO_DECODE_FPS("dec-fps", 10001),
+        FLT_VIDEO_OUTPUT_FSP("out-fps", 10002),
         FLT_FFP_PLAYBACK_RATE("plybk-rate", 10003),
-        INT64_SELECT_VIDEO_STREAM("select-v", MediaPlayer.FFP_PROP_INT64_SELECTED_VIDEO_STREAM),
-        INT64_SELECT_AUDIO_STREAM("select_a", MediaPlayer.FFP_PROP_INT64_SELECTED_AUDIO_STREAM),
-        INT64_VIDEO_DECODER("v-dec", MediaPlayer.FFP_PROP_INT64_VIDEO_DECODER),
-        INT64_AUDIO_DECODER("a-dec", MediaPlayer.FFP_PROP_INT64_AUDIO_DECODER),
-        INT64_VIDEO_CACHE_DURATION("vcache-dur", "sec", MediaPlayer.FFP_PROP_INT64_VIDEO_CACHED_DURATION),
-        INT64_AUDIO_CACHE_DURATION("acache-dur", "sec", MediaPlayer.FFP_PROP_INT64_AUDIO_CACHED_DURATION),
-        INT64_VIDEO_CACHE_BYTES("vcache-bytes", MediaPlayer.FFP_PROP_INT64_VIDEO_CACHED_BYTES),
-        INT64_AUDIO_CACHE_BYTES("acache-bytes", MediaPlayer.FFP_PROP_INT64_AUDIO_CACHED_BYTES),
-        INT64_VIDEO_CACHE_PACKETS("vcache-pkts", MediaPlayer.FFP_PROP_INT64_VIDEO_CACHED_PACKETS),
-        INT64_AUDIO_CACHE_PACKETS("acache-pkts", MediaPlayer.FFP_PROP_INT64_AUDIO_CACHED_PACKETS),
-        DOUBLE_CREATE_PLAY_TIME("create_player", MediaPlayer.FFP_PROP_DOUBLE_CREATE_PLAY_TIME),
-        DOUBLE_OPEN_FORMAT_TIME("open-url", MediaPlayer.FFP_PROP_DOUBLE_OPEN_FORMAT_TIME),
-        DOUBLE_FIND_STREAM_TIME("find-stream", MediaPlayer.FFP_PROP_DOUBLE_FIND_STREAM_TIME),
-        DOUBLE_OPEN_STREAM_TIME("open-stream", MediaPlayer.FFP_PROP_DOUBLE_OPEN_STREAM_TIME);
-        
+        INT64_SELECT_VIDEO_STREAM("select-v", 20001),
+        INT64_SELECT_AUDIO_STREAM("select_a", 20002),
+        INT64_VIDEO_DECODER("v-dec", 20003),
+        INT64_AUDIO_DECODER("a-dec", 20004),
+        INT64_VIDEO_CACHE_DURATION("vcache-dur", "sec", 20005),
+        INT64_AUDIO_CACHE_DURATION("acache-dur", "sec", 20006),
+        INT64_VIDEO_CACHE_BYTES("vcache-bytes", 20007),
+        INT64_AUDIO_CACHE_BYTES("acache-bytes", 20008),
+        INT64_VIDEO_CACHE_PACKETS("vcache-pkts", 20009),
+        INT64_AUDIO_CACHE_PACKETS("acache-pkts", 20010),
+        DOUBLE_CREATE_PLAY_TIME("create_player", 18000),
+        DOUBLE_OPEN_FORMAT_TIME("open-url", 18001),
+        DOUBLE_FIND_STREAM_TIME("find-stream", 18002),
+        DOUBLE_OPEN_STREAM_TIME("open-stream", 18003);
+
         private int mIndex;
         private String mName;
         private String mSuffix;
@@ -116,7 +160,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
         private PropertyName(String name, int index) {
             this.mName = name;
             this.mIndex = index;
-            this.mSuffix = new String(BuildConfig.FLAVOR);
+            this.mSuffix = new String("");
         }
 
         private PropertyName(String name, String suffix, int index) {
@@ -140,7 +184,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
                     return p.mSuffix;
                 }
             }
-            return new String(BuildConfig.FLAVOR);
+            return new String("");
         }
 
         public String getName() {
@@ -185,12 +229,35 @@ public class AliVcMediaPlayer implements MediaPlayer {
         }
         this.executor.scheduleAtFixedRate(new Runnable() {
             public void run() {
+                AliVcMediaPlayer.this.mReportIndex = 1 + AliVcMediaPlayer.this.mReportIndex;
+                VcPlayerLog.i("AlivcPlayerJ", "begin to send heart report index is " + AliVcMediaPlayer.this.mReportIndex);
                 if (AliVcMediaPlayer.this.mPlayer != null) {
+                    if (AliVcMediaPlayer.this.mReportIndex % 6 == 0) {
+                        ReportEventArgs rargs = new ReportEventArgs();
+                        rargs.interval = 30;
+                        rargs.videoTimeStampMs = AliVcMediaPlayer.this.getVideoTime();
+                        ReportEvent.sendEvent(rargs, AliVcMediaPlayer.this.publicPraram);
+                        DelayEventArgs dargs = new DelayEventArgs();
+                        dargs.videoDurationFromDownloadToRenderMs = AliVcMediaPlayer.this.getPropertyLong(20011, 0) / 1000;
+                        dargs.audioDurationFromDownloadToRenderMs = AliVcMediaPlayer.this.getPropertyLong(20017, 0) / 1000;
+                        DelayEvent.sendEvent(dargs, AliVcMediaPlayer.this.publicPraram);
+                    }
                     if (AliVcMediaPlayer.this.mDownloadBytes < 0) {
                         AliVcMediaPlayer.this.mDownloadBytes = AliVcMediaPlayer.this.getPropertyLong(20022, 0);
-                        AliVcMediaPlayer.this.mDownLoadDuration = AliVcMediaPlayer.this.getPropertyLong(MediaPlayer.FFP_PROP_INT64_DOWNLOAD_DURATION, 0);
+                        AliVcMediaPlayer.this.mLastReportTime = System.currentTimeMillis();
+                        AliVcMediaPlayer.this.mDownLoadDuration = AliVcMediaPlayer.this.getPropertyLong(20021, 0);
                         return;
                     }
+                    DownloadEventArgs args = new DownloadEventArgs();
+                    args.downloadBytes = AliVcMediaPlayer.this.getPropertyLong(20022, 0) - AliVcMediaPlayer.this.mDownloadBytes;
+                    AliVcMediaPlayer.this.mDownloadBytes = AliVcMediaPlayer.this.mDownloadBytes + args.downloadBytes;
+                    args.downloadDuration = System.currentTimeMillis() - AliVcMediaPlayer.this.mLastReportTime;
+                    AliVcMediaPlayer.this.mLastReportTime = System.currentTimeMillis();
+                    long downloadDuration = AliVcMediaPlayer.this.getPropertyLong(20021, 0) - AliVcMediaPlayer.this.mDownLoadDuration;
+                    AliVcMediaPlayer.this.mDownLoadDuration = AliVcMediaPlayer.this.mDownLoadDuration + downloadDuration;
+                    args.mediaBitRate = ((double) (args.downloadBytes * 8)) / (((double) downloadDuration) / 1000.0d);
+                    VcPlayerLog.d("AlivcPlayerJ", "downloadBytes is " + args.downloadBytes + " downloadDuraion is " + args.downloadDuration + " mediaBitRate is " + args.mediaBitRate + " downloadDuration is " + downloadDuration);
+                    DownloadEvent.sendEvent(args, AliVcMediaPlayer.this.publicPraram);
                 }
             }
         }, 0, 5000, TimeUnit.MILLISECONDS);
@@ -204,8 +271,11 @@ public class AliVcMediaPlayer implements MediaPlayer {
     }
 
     private void doHandlePrepare() {
-        VcPlayerLog.d(TAG, "prepare");
+        VcPlayerLog.d("AlivcPlayerJ", "prepare");
         isCanStart = new AtomicBoolean(false);
+        if (!this.mIsPublicParamIncome) {
+            this.publicPraram.changeRequestId();
+        }
         _prepare();
     }
 
@@ -238,8 +308,11 @@ public class AliVcMediaPlayer implements MediaPlayer {
         this.mSeekPosition = 0;
         this.isEOS = false;
         this.mDownloadBytes = -1;
+        this.mReportIndex = 0;
         this.cachetMaxDuration = 0;
         this.cachetMaxSize = 0;
+        this.publicPraram = null;
+        this.mIsPublicParamIncome = false;
         this.executor = Executors.newSingleThreadScheduledExecutor();
         setSurface(surface);
         this.mVA = new VideoAdjust(context);
@@ -248,44 +321,45 @@ public class AliVcMediaPlayer implements MediaPlayer {
         this.mMediaThread.setName("media_control_1");
         this.mMediaThread.start();
         this.mHandler = new MediaThreadHandler(this.mMediaThread.getLooper(), this);
-        VcPlayerLog.d(TAG, "ThreadManage: media thread id =  " + this.mMediaThread.getId());
+        VcPlayerLog.d("AlivcPlayerJ", "ThreadManage: media thread id =  " + this.mMediaThread.getId());
     }
 
     private void handlMediaMesssage(Message msg) {
-        VcPlayerLog.d(TAG, "mHandler: handleMessage =  " + msg.what);
+        VcPlayerLog.d("AlivcPlayerJ", "mHandler: handleMessage =  " + msg.what);
         switch (msg.what) {
             case 1:
                 if (this.mStatus == 3 && this.mStatus != 1) {
                     this.isEOS = false;
+                    StartPlayEvent.sendEvent(this.publicPraram);
                     doHandlePrepare();
                     return;
                 }
                 return;
             case 2:
                 if (this.mStatus == 1 || this.mStatus == 4) {
-                    VcPlayerLog.d(TAG, "play");
+                    VcPlayerLog.d("AlivcPlayerJ", "play");
                     startReportHeart();
                     _play();
                     return;
                 }
-                VcPlayerLog.d(TAG, "play , illegalStatus result = ");
+                VcPlayerLog.d("AlivcPlayerJ", "play , illegalStatus result = ");
                 return;
             case 3:
                 if (this.mStatus == 3) {
-                    VcPlayerLog.e(TAG, "stop , mStatus == STOPPED return result = ");
+                    VcPlayerLog.e("AlivcPlayerJ", "stop , mStatus == STOPPED return result = ");
                     return;
                 }
-                VcPlayerLog.d(TAG, "stop.");
+                VcPlayerLog.d("AlivcPlayerJ", "stop.");
                 _stop();
                 stopReportHeart();
                 return;
             case 4:
-                VcPlayerLog.d(TAG, "pause");
+                VcPlayerLog.d("AlivcPlayerJ", "pause");
                 _pause();
                 stopReportHeart();
                 return;
             case 5:
-                VcPlayerLog.d(TAG, "destroy");
+                VcPlayerLog.d("AlivcPlayerJ", "destroy");
                 if (this.mPlayer != null) {
                     _stop();
                     this.mPlayer.release();
@@ -297,7 +371,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
                 this.mUIStatusHandler = null;
                 this.mMediaThread = null;
                 if (this.mVA != null) {
-                    VcPlayerLog.d(TAG, "mVA destroy");
+                    VcPlayerLog.d("AlivcPlayerJ", "mVA destroy");
                     this.mVA.destroy();
                 }
                 this.mVA = null;
@@ -308,7 +382,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
                     return;
                 }
                 if (this.mStatus == 1 || this.mStatus == 4) {
-                    VcPlayerLog.e(TAG, "prepareAndPlay , mStatus == PREPARED return result = ");
+                    VcPlayerLog.e("AlivcPlayerJ", "prepareAndPlay , mStatus == PREPARED return result = ");
                     startReportHeart();
                     _play();
                     return;
@@ -322,21 +396,30 @@ public class AliVcMediaPlayer implements MediaPlayer {
                         e.printStackTrace();
                     }
                 }
-                VcPlayerLog.d(TAG, "CMD_PREPARE_AND_START prepare");
+                VcPlayerLog.d("AlivcPlayerJ", "CMD_PREPARE_AND_START prepare");
                 isCanStart = new AtomicBoolean(false);
+                if (!this.mIsPublicParamIncome) {
+                    this.publicPraram.changeRequestId();
+                }
                 int result = _prepare();
-                VcPlayerLog.d(TAG, "CMD_PREPARE_AND_START _prepare result = " + result);
+                VcPlayerLog.d("AlivcPlayerJ", "CMD_PREPARE_AND_START _prepare result = " + result);
                 if (result == 0) {
-                    VcPlayerLog.d(TAG, "CMD_PREPARE_AND_START play");
+                    VcPlayerLog.d("AlivcPlayerJ", "CMD_PREPARE_AND_START play");
                     _play();
+                    StartPlayEvent.sendEvent(this.publicPraram);
                     startReportHeart();
                     return;
                 }
-                VcPlayerLog.d(TAG, "CMD_PREPARE_AND_START prepare fail");
+                VcPlayerLog.d("AlivcPlayerJ", "CMD_PREPARE_AND_START prepare fail");
                 return;
             default:
                 return;
         }
+    }
+
+    public void setPublicParameter(PublicPraram parameter) {
+        this.mIsPublicParamIncome = parameter != null;
+        this.publicPraram = parameter;
     }
 
     private TBMPlayer getMPlayer() {
@@ -353,6 +436,9 @@ public class AliVcMediaPlayer implements MediaPlayer {
                 }
             });
             this.mPlayer.setPlaySpeed(1.0f);
+            if (this.publicPraram == null) {
+                this.publicPraram = new PublicPraram(sContext);
+            }
         }
         return this.mPlayer;
     }
@@ -372,8 +458,8 @@ public class AliVcMediaPlayer implements MediaPlayer {
             size = arg0;
             savePic(Arrays.copyOf((byte[]) msg.obj, size), size, arg1);
         } else {
-            String customData = BuildConfig.FLAVOR + msg.obj;
-            VcPlayerLog.v(TAG, "receive message : what = " + what + " , arg0 = " + arg0 + " , arg1 = " + arg1);
+            String customData = "" + msg.obj;
+            VcPlayerLog.v("AlivcPlayerJ", "receive message : what = " + what + " , arg0 = " + arg0 + " , arg1 = " + arg1);
             switch (what) {
                 case 0:
                     if (arg0 != 5) {
@@ -406,18 +492,28 @@ public class AliVcMediaPlayer implements MediaPlayer {
                     }
                 case 1:
                     if (arg0 == 20) {
+                        BufferEventArgs args = new BufferEventArgs();
+                        args.videoTimeStampMs = getVideoTime();
+                        args.error_code = "0";
+                        args.error_msg = this.mUrl;
+                        BufferEvent.sendEvent(args, this.publicPraram);
                         if (this.mInfoListener != null) {
-                            this.mInfoListener.onInfo(MediaPlayer.MEDIA_INFO_BUFFERING_START, 0);
+                            this.mInfoListener.onInfo(101, 0);
                         }
                     }
                     if (arg0 == 21) {
+                        BufferResumeEventArgs args2 = new BufferResumeEventArgs();
+                        args2.videoTimeStampMs = getVideoTime();
+                        args2.costMs = System.currentTimeMillis() - BufferEvent.mLastBufferVideoTime;
+                        BufferResumeEvent.sendEvent(args2, this.publicPraram);
+                        BufferEvent.mLastBufferVideoTime = -1;
                         if (this.mInfoListener != null) {
-                            this.mInfoListener.onInfo(MediaPlayer.MEDIA_INFO_BUFFERING_END, 0);
+                            this.mInfoListener.onInfo(102, 0);
                         }
                     }
                     if (arg0 == 22) {
                         if (this.mInfoListener != null) {
-                            this.mInfoListener.onInfo(MediaPlayer.MEDIA_INFO_BUFFERING_PROGRESS, arg1);
+                            this.mInfoListener.onInfo(105, arg1);
                         }
                         if (this.mBufferingUpdateListener != null) {
                             this.mBufferingUpdateListener.onBufferingUpdateListener(arg1);
@@ -535,12 +631,12 @@ public class AliVcMediaPlayer implements MediaPlayer {
                 case 7:
                     final Map<String, String> userInfo = new HashMap();
                     int infoType = arg0;
-                    userInfo.put("videoTime", BuildConfig.FLAVOR + arg1);
-                    userInfo.put("infoType", BuildConfig.FLAVOR + infoType);
+                    userInfo.put("videoTime", "" + arg1);
+                    userInfo.put("infoType", "" + infoType);
                     if (arg0 == 5 || arg0 == 3 || arg0 == 8) {
                         userInfo.put("costTime", customData);
                     } else if (arg0 == 2) {
-                        userInfo.put("seekTime", arg1 + BuildConfig.FLAVOR);
+                        userInfo.put("seekTime", arg1 + "");
                     }
                     new Thread(new Runnable() {
                         public void run() {
@@ -565,6 +661,15 @@ public class AliVcMediaPlayer implements MediaPlayer {
 
     private void handleErrorReport() {
         if (getErrorCode() != AliyunErrorCode.ALIVC_SUCCESS.getCode()) {
+            String errDescription = this.mErrorCode.getDescription(sContext);
+            ErrorEventArgs args = new ErrorEventArgs();
+            args.videoTimeStampMs = (long) getCurrentPosition();
+            args.error_code = getErrorCode();
+            args.error_msg = errDescription;
+            args.cdnError = getPropertyString(20103, "");
+            args.cdnVia = getPropertyString(20102, "");
+            args.eagleId = getPropertyString(20101, "");
+            ErrorEvent.sendEvent(args, this.publicPraram);
         }
     }
 
@@ -633,6 +738,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
         if (this.mPlayer != null && this.mPlayer.start() == 0) {
             this.mStatus = 2;
         }
+        this.publicPraram.setCdn_ip(getPropertyString(20100, "0.0.0.0"));
     }
 
     public void resume() {
@@ -640,7 +746,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
     }
 
     public void play() {
-        VcPlayerLog.d(TAG, "play , sendMessage CMD_PLAY result = ");
+        VcPlayerLog.d("AlivcPlayerJ", "play , sendMessage CMD_PLAY result = ");
         Message msg = this.mHandler.obtainMessage();
         msg.what = 2;
         this.mHandler.sendMessage(msg);
@@ -657,7 +763,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
     }
 
     private long getVideoTime() {
-        long videoTime = getPropertyLong(MediaPlayer.FFP_PROP_INT64_AUDIO_LASTPTS, 0);
+        long videoTime = getPropertyLong(20014, 0);
         if (videoTime < 0) {
             videoTime = 0;
         }
@@ -669,10 +775,10 @@ public class AliVcMediaPlayer implements MediaPlayer {
         this.mHandler.removeMessages(2);
         this.mHandler.removeMessages(1);
         this.mHandler.removeMessages(3);
-        VcPlayerLog.d(TAG, "MPlayer: send stop message.");
+        VcPlayerLog.d("AlivcPlayerJ", "MPlayer: send stop message.");
         Message msg = this.mHandler.obtainMessage();
         msg.what = 3;
-        VcPlayerLog.d(TAG, "stop , sendMessage = CMD_STOP result = " + this.mHandler.sendMessage(msg));
+        VcPlayerLog.d("AlivcPlayerJ", "stop , sendMessage = CMD_STOP result = " + this.mHandler.sendMessage(msg));
     }
 
     public void pause() {
@@ -683,7 +789,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
 
     private void _pause() {
         if (this.mPlayer != null) {
-            this.mPlayer.pause(PAUSE_BUFFERING_TIME);
+            this.mPlayer.pause(30000);
             this.mStatus = 4;
         }
     }
@@ -717,14 +823,14 @@ public class AliVcMediaPlayer implements MediaPlayer {
             setUrl(url);
             this.mKey = null;
             this.mCircleCount = 10;
-            VcPlayerLog.d(TAG, "prepareAndPlay , status = " + this.mStatus);
+            VcPlayerLog.d("AlivcPlayerJ", "prepareAndPlay , status = " + this.mStatus);
             Message msg = this.mHandler.obtainMessage();
             msg.what = 8;
             boolean result = this.mHandler.sendMessage(msg);
             return;
         }
         this.mUIStatusHandler.sendEmptyMessage(20);
-        VcPlayerLog.e(TAG, "prepareAndPlay , mStatus == checkAuth return result = ");
+        VcPlayerLog.e("AlivcPlayerJ", "prepareAndPlay , mStatus == checkAuth return result = ");
     }
 
     public void prepare(String url, int start_ms, int decoderType, String videoKey, int circleCount) {
@@ -807,7 +913,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
     }
 
     public String getSDKVersion() {
-        return MediaPlayer.VERSION_ID;
+        return "3.2.2";
     }
 
     public int getVideoWidth() {
@@ -901,8 +1007,19 @@ public class AliVcMediaPlayer implements MediaPlayer {
         return true;
     }
 
-    public static void init(Context context) {
+    public static void init(Context context, String businessId) {
         sContext = context.getApplicationContext();
+        PublicPraram.setBusinessId(businessId);
+        PublicPraram.setSDkVersion("3.2.2");
+        InformationReport.disableReport();
+    }
+
+    public static void init(Context context) {
+        init(context, "");
+    }
+
+    public static void setUserId(String userId) {
+        PublicPraram.setUserId(userId);
     }
 
     public void destroy() {
@@ -939,7 +1056,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
         if (this.mPlayer != null) {
             return this.mPlayer.getPropertyString(key, defaultValue);
         }
-        return BuildConfig.FLAVOR;
+        return "";
     }
 
     private void onInfoReport(Map<String, String> userInfo) {
@@ -951,36 +1068,94 @@ public class AliVcMediaPlayer implements MediaPlayer {
         if (infoType > 0) {
             switch (infoType) {
                 case 1:
+                    PlayEventArgs args = new PlayEventArgs();
+                    args.mode = DefinitionPlayMode.fixed;
+                    args.videoTimeStempMs = (long) videoTime;
+                    args.connectTimeMs = (long) getPropertyDouble(18001, 0.0d);
+                    args.donwloadTimeMs = ((long) getPropertyDouble(18004, 0.0d)) - ((long) getPropertyDouble(18002, 0.0d));
+                    args.ffprobeTimeMs = ((long) getPropertyDouble(18002, 0.0d)) - args.connectTimeMs;
+                    args.videoWidth = getVideoWidth();
+                    args.videoHeight = getVideoHeight();
+                    if (TextUtils.isEmpty(this.mKey)) {
+                        args.encrypted = "false";
+                    } else {
+                        args.encrypted = "true";
+                    }
+                    args.eagleId = getPropertyString(20101, "");
+                    args.cdnVia = getPropertyString(20102, "");
+                    args.openTime = getPropertyString(20104, "");
+                    PlayEvent.sendEvent(args, this.publicPraram);
                     startReportHeart();
                     return;
                 case 2:
+                    SeekEventArgs args2 = new SeekEventArgs();
+                    args2.fromTimeStampMs = (long) videoTime;
+                    args2.toTimeStampMs = (long) this.mSeekPosition;
+                    args2.cndVia = getPropertyString(20102, "");
+                    args2.eagleId = getPropertyString(20101, "");
+                    SeekEvent.sendEvent(args2, this.publicPraram);
                     return;
                 case 3:
+                    SeekCompleteEventArgs args3 = new SeekCompleteEventArgs();
+                    args3.videoTimeStampMs = (long) videoTime;
+                    args3.costMs = System.currentTimeMillis() - SeekEvent.mLastSeekVideoTime;
+                    args3.cndVia = getPropertyString(20102, "");
+                    args3.eagleId = getPropertyString(20101, "");
+                    SeekCompleteEvent.sendEvent(args3, this.publicPraram);
+                    SeekEvent.mLastSeekVideoTime = -1;
                     return;
                 case 4:
                     if (!this.isEOS) {
+                        PauseEvent.sendEvent((long) videoTime, this.publicPraram);
                         return;
                     }
                     return;
                 case 5:
+                    PauseResumeEventArgs args4 = new PauseResumeEventArgs();
+                    args4.videoTimeStampMs = (long) videoTime;
+                    args4.costMs = System.currentTimeMillis() - PauseEvent.mLastPauseVideoTime;
+                    PauseResumeEvent.sendEvent(args4, this.publicPraram);
+                    PauseEvent.mLastPauseVideoTime = -1;
                     return;
                 case 6:
                     if (!this.isEOS) {
                         stopReportHeart();
+                        if (!this.mIsPublicParamIncome) {
+                            this.publicPraram.resetRequestId();
+                        }
+                        StopEvent.sendEvent((long) videoTime, this.publicPraram);
                         return;
                     }
                     return;
                 case 7:
+                    BufferEventArgs args5 = new BufferEventArgs();
+                    args5.videoTimeStampMs = (long) videoTime;
+                    args5.error_code = "";
+                    args5.error_msg = "";
+                    BufferEvent.sendEvent(args5, this.publicPraram);
                     return;
                 case 8:
+                    BufferResumeEventArgs args6 = new BufferResumeEventArgs();
+                    args6.videoTimeStampMs = (long) videoTime;
+                    args6.costMs = System.currentTimeMillis() - BufferEvent.mLastBufferVideoTime;
+                    BufferResumeEvent.sendEvent(args6, this.publicPraram);
+                    BufferEvent.mLastBufferVideoTime = -1;
                     return;
                 case 9:
                     stopReportHeart();
+                    EOSEvent.sendEvent((long) videoTime, this.publicPraram);
                     return;
                 case 10:
                     if (videoTime == 0) {
+                        BufferingToLocalStartArgs args7 = new BufferingToLocalStartArgs();
+                        args7.cache_duration_ms = this.cachetMaxDuration * 1000;
+                        args7.cache_size_mb = (int) this.cachetMaxSize;
+                        BufferingToLocalEvent.sendEvent(args7, this.publicPraram);
                         return;
                     } else if (videoTime > 0) {
+                        BufferingToLocalFinishArgs args8 = new BufferingToLocalFinishArgs();
+                        args8.video_duration_ms = getDuration();
+                        BufferingToLocalEvent.sendEvent(args8, this.publicPraram);
                         return;
                     } else {
                         return;
@@ -1060,6 +1235,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
 
     public void setUrl(String url) {
         this.mUrl = url;
+        this.publicPraram.setVideoUrl(url);
     }
 
     public Bitmap snapShot() {
@@ -1091,7 +1267,7 @@ public class AliVcMediaPlayer implements MediaPlayer {
             }
             return bitmap;
         }
-        VcPlayerLog.e(TAG, "stop , mStatus == STOPPED return null ");
+        VcPlayerLog.e("AlivcPlayerJ", "stop , mStatus == STOPPED return null ");
         return null;
     }
 
@@ -1110,13 +1286,13 @@ public class AliVcMediaPlayer implements MediaPlayer {
     public Map<String, String> getAllDebugInfo() {
         int propertyId;
         Map<String, String> infoMap = new HashMap();
-        for (propertyId = MediaPlayer.PROP_DOUBLE_VIDEO_DECODE_FRAMES_PER_SECOND; propertyId <= 10003; propertyId++) {
+        for (propertyId = 10001; propertyId <= 10003; propertyId++) {
             infoMap = getPropertyInfo(propertyId, infoMap);
         }
-        for (propertyId = MediaPlayer.FFP_PROP_DOUBLE_CREATE_PLAY_TIME; propertyId <= MediaPlayer.FFP_PROP_DOUBLE_1st_VFRAME_SHOW_TIME; propertyId++) {
+        for (propertyId = 18000; propertyId <= 18004; propertyId++) {
             infoMap = getPropertyInfo(propertyId, infoMap);
         }
-        for (propertyId = MediaPlayer.FFP_PROP_INT64_SELECTED_VIDEO_STREAM; propertyId <= 20022; propertyId++) {
+        for (propertyId = 20001; propertyId <= 20022; propertyId++) {
             infoMap = getPropertyInfo(propertyId, infoMap);
         }
         return infoMap;
@@ -1139,21 +1315,21 @@ public class AliVcMediaPlayer implements MediaPlayer {
     }
 
     private Map<String, String> getPropertyInfo(int propertyId, Map<String, String> infoMap) {
-        if (propertyId <= 10003 && MediaPlayer.PROP_DOUBLE_VIDEO_DECODE_FRAMES_PER_SECOND <= propertyId) {
+        if (propertyId <= 10003 && 10001 <= propertyId) {
             infoMap.put(PropertyName.getName(propertyId), Double.toString(getPropertyDouble(propertyId, 0.0d)).concat(PropertyName.getSuffixName(propertyId)));
         }
-        if (propertyId >= MediaPlayer.FFP_PROP_DOUBLE_CREATE_PLAY_TIME && MediaPlayer.FFP_PROP_DOUBLE_OPEN_STREAM_TIME >= propertyId) {
+        if (propertyId >= 18000 && 18003 >= propertyId) {
             infoMap.put(PropertyName.getName(propertyId), Double.toString(getPropertyDouble(propertyId, 0.0d)));
         }
-        if (propertyId <= 20022 && MediaPlayer.FFP_PROP_INT64_SELECTED_VIDEO_STREAM <= propertyId) {
+        if (propertyId <= 20022 && 20001 <= propertyId) {
             String strCnv;
             long intgerVaule = getPropertyLong(propertyId, 0);
             String strVaule = PropertyName.getName(propertyId);
-            if (propertyId == MediaPlayer.FFP_PROP_INT64_VIDEO_CACHED_BYTES || propertyId == MediaPlayer.FFP_PROP_INT64_AUDIO_CACHED_BYTES) {
+            if (propertyId == 20007 || propertyId == 20008) {
                 strCnv = formatedSize(intgerVaule);
-            } else if (propertyId == MediaPlayer.FFP_PROP_INT64_VIDEO_CACHED_DURATION || propertyId == MediaPlayer.FFP_PROP_INT64_AUDIO_CACHED_DURATION) {
+            } else if (propertyId == 20005 || propertyId == 20006) {
                 strCnv = formatedDurationMilli(intgerVaule);
-            } else if (propertyId != MediaPlayer.FFP_PROP_INT64_VIDEO_DECODER) {
+            } else if (propertyId != 20003) {
                 strCnv = Long.toString(intgerVaule).concat(PropertyName.getSuffixName(propertyId));
             } else if (intgerVaule == 1) {
                 strCnv = "AVCodec";

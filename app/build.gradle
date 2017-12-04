@@ -32,10 +32,10 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
-    compile project(':alivc')
+    implementation project(':alivc')
 
 //    compile(name: 'AlivcPlayer', ext: 'aar')
-    compile(name: 'AliyunVodPlayer', ext: 'aar')
-    compile(name: 'AliyunVodPlayerView', ext: 'aar')
+    implementation(name: 'AliyunVodPlayer', ext: 'aar')
+    implementation(name: 'AliyunVodPlayerView', ext: 'aar')
 }
 

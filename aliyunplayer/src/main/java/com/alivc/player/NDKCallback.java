@@ -29,25 +29,25 @@ public class NDKCallback {
                 map = sKnownCodecList;
             } else {
                 sKnownCodecList = new TreeMap(String.CASE_INSENSITIVE_ORDER);
-                sKnownCodecList.put("OMX.Nvidia.h264.decode", Integer.valueOf(RankConst.RANK_TESTED));
-                sKnownCodecList.put("OMX.Nvidia.h264.decode.secure", Integer.valueOf(RankConst.RANK_SECURE));
+                sKnownCodecList.put("OMX.Nvidia.h264.decode", Integer.valueOf(800));
+                sKnownCodecList.put("OMX.Nvidia.h264.decode.secure", Integer.valueOf(300));
                 sKnownCodecList.put("OMX.Intel.hw_vd.h264", Integer.valueOf(801));
-                sKnownCodecList.put("OMX.Intel.VideoDecoder.AVC", Integer.valueOf(RankConst.RANK_TESTED));
-                sKnownCodecList.put("OMX.qcom.video..avc", Integer.valueOf(RankConst.RANK_TESTED));
+                sKnownCodecList.put("OMX.Intel.VideoDecoder.AVC", Integer.valueOf(800));
+                sKnownCodecList.put("OMX.qcom.video..avc", Integer.valueOf(800));
                 sKnownCodecList.put("OMX.ittiam.video.decoder.avc", Integer.valueOf(0));
-                sKnownCodecList.put("OMX.SEC.avc.dec", Integer.valueOf(RankConst.RANK_TESTED));
+                sKnownCodecList.put("OMX.SEC.avc.dec", Integer.valueOf(800));
                 sKnownCodecList.put("OMX.SEC.AVC.Decoder", Integer.valueOf(799));
                 sKnownCodecList.put("OMX.SEC.avcdec", Integer.valueOf(798));
-                sKnownCodecList.put("OMX.SEC.avc.sw.dec", Integer.valueOf(RankConst.RANK_SOFTWARE));
-                sKnownCodecList.put("OMX.Exynos.avc.dec", Integer.valueOf(RankConst.RANK_TESTED));
+                sKnownCodecList.put("OMX.SEC.avc.sw.dec", Integer.valueOf(200));
+                sKnownCodecList.put("OMX.Exynos.avc.dec", Integer.valueOf(800));
                 sKnownCodecList.put("OMX.Exynos.AVC.Decoder", Integer.valueOf(799));
-                sKnownCodecList.put("OMX.k3.video.decoder.avc", Integer.valueOf(RankConst.RANK_TESTED));
-                sKnownCodecList.put("OMX.IMG.MSVDX.Decoder.AVC", Integer.valueOf(RankConst.RANK_TESTED));
-                sKnownCodecList.put("OMX.TI.DUCATI1.VIDEO.DECODER", Integer.valueOf(RankConst.RANK_TESTED));
-                sKnownCodecList.put("OMX.rk.video_decoder.avc", Integer.valueOf(RankConst.RANK_TESTED));
-                sKnownCodecList.put("OMX.amlogic.avc.decoder.awesome", Integer.valueOf(RankConst.RANK_TESTED));
-                sKnownCodecList.put("OMX.MARVELL.VIDEO.HW.CODA7542DECODER", Integer.valueOf(RankConst.RANK_TESTED));
-                sKnownCodecList.put("OMX.MARVELL.VIDEO.H264DECODER", Integer.valueOf(RankConst.RANK_SOFTWARE));
+                sKnownCodecList.put("OMX.k3.video.decoder.avc", Integer.valueOf(800));
+                sKnownCodecList.put("OMX.IMG.MSVDX.Decoder.AVC", Integer.valueOf(800));
+                sKnownCodecList.put("OMX.TI.DUCATI1.VIDEO.DECODER", Integer.valueOf(800));
+                sKnownCodecList.put("OMX.rk.video_decoder.avc", Integer.valueOf(800));
+                sKnownCodecList.put("OMX.amlogic.avc.decoder.awesome", Integer.valueOf(800));
+                sKnownCodecList.put("OMX.MARVELL.VIDEO.HW.CODA7542DECODER", Integer.valueOf(800));
+                sKnownCodecList.put("OMX.MARVELL.VIDEO.H264DECODER", Integer.valueOf(200));
                 sKnownCodecList.remove("OMX.BRCM.vc4.decoder.avc");
                 sKnownCodecList.remove("OMX.brcm.video.h264.hw.decoder");
                 sKnownCodecList.remove("OMX.brcm.video.h264.decoder");
@@ -59,10 +59,10 @@ public class NDKCallback {
                 sKnownCodecList.remove("OMX.cosmo.video.decoder.avc");
                 sKnownCodecList.remove("OMX.duos.h264.decoder");
                 sKnownCodecList.remove("OMX.bluestacks.hw.decoder");
-                sKnownCodecList.put("OMX.google.h264.decoder", Integer.valueOf(RankConst.RANK_SOFTWARE));
-                sKnownCodecList.put("OMX.google.h264.lc.decoder", Integer.valueOf(RankConst.RANK_SOFTWARE));
-                sKnownCodecList.put("OMX.k3.ffmpeg.decoder", Integer.valueOf(RankConst.RANK_SOFTWARE));
-                sKnownCodecList.put("OMX.ffmpeg.video.decoder", Integer.valueOf(RankConst.RANK_SOFTWARE));
+                sKnownCodecList.put("OMX.google.h264.decoder", Integer.valueOf(200));
+                sKnownCodecList.put("OMX.google.h264.lc.decoder", Integer.valueOf(200));
+                sKnownCodecList.put("OMX.k3.ffmpeg.decoder", Integer.valueOf(200));
+                sKnownCodecList.put("OMX.ffmpeg.video.decoder", Integer.valueOf(200));
                 map = sKnownCodecList;
             }
         }
@@ -294,7 +294,7 @@ public class NDKCallback {
                 bestCodec = codec;
             }
         }
-        if (bestCodec.mRank >= RankConst.RANK_LAST_CHANCE) {
+        if (bestCodec.mRank >= 600) {
             return bestCodec.mCodecInfo.getName();
         }
         return null;

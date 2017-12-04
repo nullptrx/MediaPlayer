@@ -97,7 +97,7 @@ public interface MediaPlayer {
     public static final int PROP_DOUBLE_VIDEO_DECODE_FRAMES_PER_SECOND = 10001;
     public static final int PROP_DOUBLE_VIDEO_OUTPUT_FRAMES_PER_SECOND = 10002;
     public static final int STOPPED = 3;
-    public static final String VERSION_ID = "3.2.0";
+    public static final String VERSION_ID = "3.2.2";
 
     public interface MediaPlayerBufferingUpdateListener {
         void onBufferingUpdateListener(int i);

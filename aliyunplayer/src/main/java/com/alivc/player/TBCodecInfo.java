@@ -16,15 +16,15 @@ class TBCodecInfo {
         if (!name.startsWith("omx.")) {
             rank = 100;
         } else if (name.startsWith("omx.pv")) {
-            rank = RankConst.RANK_SOFTWARE;
+            rank = 200;
         } else if (name.startsWith("omx.google.")) {
-            rank = RankConst.RANK_SOFTWARE;
+            rank = 200;
         } else if (name.startsWith("omx.ffmpeg.")) {
-            rank = RankConst.RANK_SOFTWARE;
+            rank = 200;
         } else if (name.startsWith("omx.k3.ffmpeg.")) {
-            rank = RankConst.RANK_SOFTWARE;
+            rank = 200;
         } else if (name.startsWith("omx.avcodec.")) {
-            rank = RankConst.RANK_SOFTWARE;
+            rank = 200;
         } else if (name.startsWith("omx.ittiam.")) {
             rank = 0;
         } else if (!name.startsWith("omx.mtk.")) {
@@ -34,18 +34,18 @@ class TBCodecInfo {
             } else {
                 try {
                     if (codecInfo.getCapabilitiesForType(mimeType) != null) {
-                        rank = RankConst.RANK_ACCEPTABLE;
+                        rank = 700;
                     } else {
-                        rank = RankConst.RANK_LAST_CHANCE;
+                        rank = 600;
                     }
                 } catch (Throwable th) {
-                    rank = RankConst.RANK_LAST_CHANCE;
+                    rank = 600;
                 }
             }
         } else if (VERSION.SDK_INT < 18) {
             rank = 0;
         } else {
-            rank = RankConst.RANK_TESTED;
+            rank = 800;
         }
         this.mCodecInfo = codecInfo;
         this.mRank = rank;

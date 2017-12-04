@@ -35,7 +35,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
 
-    api(name: 'AlivcPlayer', ext: 'aar')
-//    provided(name: 'AliyunVodPlayer', ext: 'aar')
-//    provided(name: 'AliyunVodPlayerView', ext: 'aar')
+//    api(name: 'AlivcPlayer', ext: 'aar')
+    api project(':aliyunplayer')
 }

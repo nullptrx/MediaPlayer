@@ -1,5 +1,6 @@
 package com.alivc.player;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
@@ -73,13 +74,15 @@ public class EGLView extends GLSurfaceView {
 
         private void printConfigs(EGL10 egl, EGLDisplay display, EGLConfig[] configs) {
             VcPlayerLog.w(EGLView.TAG, String.format("%d configurations", new Object[]{Integer.valueOf(configs.length)}));
-            for (int i = 0; i < configs.length; i++) {
-                EGLConfig printConfig = configs[i];
+            int i = 0;
+            for (EGLConfig printConfig : configs) {
                 VcPlayerLog.w(EGLView.TAG, String.format("Configuration %d:\n", new Object[]{Integer.valueOf(i)}));
+                i++;
                 printConfig(egl, display, printConfig);
             }
         }
 
+        @SuppressLint("DefaultLocale")
         private void printConfig(EGL10 egl, EGLDisplay display, EGLConfig config) {
             int[] attributes = new int[]{12320, 12321, 12322, 12323, 12324, 12325, 12326, 12327, 12328, 12329, 12330, 12331, 12332, 12333, 12334, 12335, 12336, 12337, 12338, 12339, 12340, 12343, 12342, 12341, 12345, 12346, 12347, 12348, 12349, 12350, 12351, 12352, 12354};
             String[] names = new String[]{"EGL_BUFFER_SIZE", "EGL_ALPHA_SIZE", "EGL_BLUE_SIZE", "EGL_GREEN_SIZE", "EGL_RED_SIZE", "EGL_DEPTH_SIZE", "EGL_STENCIL_SIZE", "EGL_CONFIG_CAVEAT", "EGL_CONFIG_ID", "EGL_LEVEL", "EGL_MAX_PBUFFER_HEIGHT", "EGL_MAX_PBUFFER_PIXELS", "EGL_MAX_PBUFFER_WIDTH", "EGL_NATIVE_RENDERABLE", "EGL_NATIVE_VISUAL_ID", "EGL_NATIVE_VISUAL_TYPE", "EGL_PRESERVED_RESOURCES", "EGL_SAMPLES", "EGL_SAMPLE_BUFFERS", "EGL_SURFACE_TYPE", "EGL_TRANSPARENT_TYPE", "EGL_TRANSPARENT_RED_VALUE", "EGL_TRANSPARENT_GREEN_VALUE", "EGL_TRANSPARENT_BLUE_VALUE", "EGL_BIND_TO_TEXTURE_RGB", "EGL_BIND_TO_TEXTURE_RGBA", "EGL_MIN_SWAP_INTERVAL", "EGL_MAX_SWAP_INTERVAL", "EGL_LUMINANCE_SIZE", "EGL_ALPHA_MASK_SIZE", "EGL_COLOR_BUFFER_TYPE", "EGL_RENDERABLE_TYPE", "EGL_CONFORMANT"};
@@ -88,7 +91,7 @@ public class EGLView extends GLSurfaceView {
                 int attribute = attributes[i];
                 String name = names[i];
                 if (egl.eglGetConfigAttrib(display, config, attribute, value)) {
-                    VcPlayerLog.w(EGLView.TAG, String.format("  %s: %d\n", new Object[]{name, Integer.valueOf(value[0])}));
+                    VcPlayerLog.w(EGLView.TAG, String.format("  %s: %d\n", name, value[0]));
                 } else {
                     while (egl.eglGetError() != 12288) {
                     }
@@ -176,9 +179,9 @@ public class EGLView extends GLSurfaceView {
     }
 
     private static void checkEglError(String prompt, EGL10 egl) {
-        int error = egl.eglGetError();
-        while (error != 12288) {
-            VcPlayerLog.e(TAG, String.format("%s: EGL error: 0x%x", new Object[]{prompt, Integer.valueOf(error)}));
+        int error;
+        while ((error = egl.eglGetError()) != 12288) {
+            VcPlayerLog.e(TAG, String.format("%s: EGL error: 0x%x", prompt, error));
         }
     }
 }

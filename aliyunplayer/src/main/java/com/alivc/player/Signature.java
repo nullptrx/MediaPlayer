@@ -11,8 +11,8 @@ public class Signature {
 
     public static String calculateRFC2104HMAC(String data, String key) throws SignatureException {
         try {
-            SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(), HMAC_SHA1_ALGORITHM);
-            Mac mac = Mac.getInstance(HMAC_SHA1_ALGORITHM);
+            SecretKeySpec signingKey = new SecretKeySpec(key.getBytes(), "HmacSHA1");
+            Mac mac = Mac.getInstance("HmacSHA1");
             mac.init(signingKey);
             return encode(mac.doFinal(data.getBytes()));
         } catch (Exception e) {
