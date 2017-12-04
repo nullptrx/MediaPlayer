@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.UUID;
@@ -13,8 +14,8 @@ public class InformationReport {
     private static String mBusinessId;
     private static String mCdnIp;
     private static String mDeviceModel;
-    private static boolean mEnable;
-//    private static String mHost = "http://videocloud.cn-hangzhou.log.aliyuncs.com/logstores/player/track?APIVersion=0.6.0&";
+    private static boolean mEnable = false;
+    //    private static String mHost = "http://videocloud.cn-hangzhou.log.aliyuncs.com/logstores/player/track?APIVersion=0.6.0&";
     private static String mHost = "http://127.0.0.1/logstores/player/track?APIVersion=0.6.0&";
     private static long mLastBufferVideoTime = -1;
     private static long mLastPauseVideoTime = -1;
@@ -232,15 +233,21 @@ public class InformationReport {
     }
 
     private static void sendUrl(final String url) {
-        VcPlayerLog.d("UserTraceReport", "usertrace : url = " + url);
-        new Thread(new Runnable() {
-            public void run() {
-                try {
-                    HttpClientUtil.doHttpsGet(url);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        if (mEnable) {
+            VcPlayerLog.d("UserTraceReport", "usertrace : url = " + url);
+//        new Thread(new Runnable() {
+//            public void run() {
+//                try {
+//                    HttpClientUtil.doHttpsGet(url);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
+        }
+    }
+
+    public static boolean enable() {
+        return mEnable;
     }
 }

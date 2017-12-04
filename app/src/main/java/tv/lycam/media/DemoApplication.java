@@ -3,7 +3,6 @@ package tv.lycam.media;
 import android.app.Application;
 
 import com.alivc.player.AliVcMediaPlayer;
-import com.alivc.player.VcPlayerLog;
 
 /**
  * @Author: lifujun@alibaba-inc.com
@@ -19,7 +18,6 @@ public class DemoApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        VcPlayerLog.enableLog();
         initLeakcanary();//初始化内存检测
 
 

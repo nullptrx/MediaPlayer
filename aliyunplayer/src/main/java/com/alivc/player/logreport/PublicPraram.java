@@ -7,7 +7,7 @@ import android.os.Build.VERSION;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.aliyun.aliyunplayer.BuildConfig;
+import com.alivc.player.InformationReport;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -171,7 +171,7 @@ public class PublicPraram {
         finalSb.append("app_n=").append(EventUtils.urlEncode(application_name)).append("&");
         finalSb.append("cdn_ip=").append(EventUtils.urlEncode(this.cdn_ip)).append("&");
         finalSb.append("r=").append(EventUtils.urlEncode(referer));
-        if (BuildConfig.DEBUG) {
+        if (InformationReport.enable()) {
             Log.d(TAG, finalSb.toString());
         }
         return finalSb.toString();

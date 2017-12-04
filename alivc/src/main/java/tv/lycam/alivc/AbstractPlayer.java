@@ -43,8 +43,6 @@ import tv.lycam.alivc.utils.Debugger;
 public abstract class AbstractPlayer extends RatioFrameLayout {
 
     public static final String TAG = "AlivcPlayer";
-    //日志打印
-    protected boolean DEBUG = true;
 
     // 默认缩放模式
     protected MediaPlayer.VideoScalingMode DEFAULT_ASPECTRATIO = MediaPlayer.VideoScalingMode.VIDEO_SCALING_MODE_SCALE_TO_FIT;
@@ -89,6 +87,18 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
     public AbstractPlayer(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context);
+    }
+
+    public void enableNativeLog() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.enableNativeLog();
+        }
+    }
+
+    public void disableNativeLog() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.disableNativeLog();
+        }
     }
 
     private TextureView.SurfaceTextureListener mSurfaceTextureListener = new TextureView.SurfaceTextureListener() {
@@ -254,11 +264,7 @@ public abstract class AbstractPlayer extends RatioFrameLayout {
         mMediaPlayer.setFrameInfoListener(mOnBaseFrameInfoListener);
         mMediaPlayer.setStoppedListener(mOnBaseStoppedListener);
         mMediaPlayer.setVideoScalingMode(DEFAULT_ASPECTRATIO);
-        if (DEBUG) {
-            mMediaPlayer.enableNativeLog();
-        } else {
-            mMediaPlayer.disableNativeLog();
-        }
+        mMediaPlayer.disableNativeLog();
     }
 
     private void initInflate(Context context) {

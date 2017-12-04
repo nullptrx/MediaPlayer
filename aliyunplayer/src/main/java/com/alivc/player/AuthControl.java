@@ -2,7 +2,6 @@ package com.alivc.player;
 
 import android.content.Context;
 
-import com.alivc.player.logreport.PublicPraram;
 import com.alivc.player.model.AuthModel;
 import com.alivc.player.model.Switch;
 import com.alivc.player.model.SwithList;
@@ -22,7 +21,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 public class AuthControl {
     private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -88,27 +86,28 @@ public class AuthControl {
     }
 
     public boolean checkTopValid(AccessKey accessToken) {
-        try {
-            String json = HttpClientUtil.doHttpsGet(constructUrl(accessToken.getAccessId(), accessToken.getAccessKey(), UUID.randomUUID().toString()));
-            if (json == null) {
-                return false;
-            }
-            AuthModel auth = createAuthFromJson(json);
-            if (!(auth == null || auth.getSwitchList() == null || auth.getSwitchList().getSwitch() == null)) {
-                if (auth.getLogURL() != null) {
-                    PublicPraram.setHost(auth.getLogURL());
-                }
-                for (Switch sw : auth.getSwitchList().getSwitch()) {
-                    if (!(sw.getFunctionName() == null || sw.getState() == null)) {
-                        this.mAuthMap.put(sw.getFunctionName(), sw.getState());
-                    }
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+//        try {
+//            String json = HttpClientUtil.doHttpsGet(constructUrl(accessToken.getAccessId(), accessToken.getAccessKey(), UUID.randomUUID().toString()));
+//            if (json == null) {
+//                return false;
+//            }
+//            AuthModel auth = createAuthFromJson(json);
+//            if (!(auth == null || auth.getSwitchList() == null || auth.getSwitchList().getSwitch() == null)) {
+//                if (auth.getLogURL() != null) {
+//                    PublicPraram.setHost(auth.getLogURL());
+//                }
+//                for (Switch sw : auth.getSwitchList().getSwitch()) {
+//                    if (!(sw.getFunctionName() == null || sw.getState() == null)) {
+//                        this.mAuthMap.put(sw.getFunctionName(), sw.getState());
+//                    }
+//                }
+//            }
+//            return true;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+        return true;
     }
 
     public static String inputStream2String(InputStream is) throws IOException {
