@@ -17,7 +17,6 @@ import tv.danmaku.ijk.media.player.IMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkMediaPlayer;
 import tv.danmaku.ijk.media.player.IjkTimedText;
 import tv.lycam.alivc.PlayerState;
-import tv.lycam.alivc.utils.MeasureHelper;
 
 /**
  * @author 诸葛不亮
@@ -25,7 +24,7 @@ import tv.lycam.alivc.utils.MeasureHelper;
  * @description
  */
 
-public class IjkVideoView extends TextureView implements TextureView.SurfaceTextureListener {
+public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextureListener {
     public static final String TAG = "IjkVideoView";
     private Uri mUri;
     private Map<String, String> mHeaders;
@@ -37,7 +36,6 @@ public class IjkVideoView extends TextureView implements TextureView.SurfaceText
     private IMediaPlayer.OnPreparedListener mOnPreparedListener;
     private IMediaPlayer.OnErrorListener mOnErrorListener;
     private IMediaPlayer.OnInfoListener mOnInfoListener;
-    private MeasureHelper mMeasureHelper;
 
     public IjkVideoView(Context context) {
         this(context, null);
@@ -52,43 +50,8 @@ public class IjkVideoView extends TextureView implements TextureView.SurfaceText
         initRender(context);
     }
 
-    //--------------------
-    // Layout & Measure
-    //--------------------
-    public void setVideoSize(int videoWidth, int videoHeight) {
-        if (videoWidth > 0 && videoHeight > 0) {
-            mMeasureHelper.setVideoSize(videoWidth, videoHeight);
-            requestLayout();
-        }
-    }
-
-    public void setVideoSampleAspectRatio(int videoSarNum, int videoSarDen) {
-        if (videoSarNum > 0 && videoSarDen > 0) {
-            mMeasureHelper.setVideoSampleAspectRatio(videoSarNum, videoSarDen);
-            requestLayout();
-        }
-    }
-
-    public void setVideoRotation(int degree) {
-        mMeasureHelper.setVideoRotation(degree);
-        setRotation(degree);
-    }
-
-    public void setAspectRatio(int aspectRatio) {
-        mMeasureHelper.setAspectRatio(aspectRatio);
-        requestLayout();
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mMeasureHelper.doMeasure(widthMeasureSpec, heightMeasureSpec);
-        setMeasuredDimension(mMeasureHelper.getMeasuredWidth(), mMeasureHelper.getMeasuredHeight());
-    }
-
-
     private void initRender(Context context) {
         mContext = context;
-        mMeasureHelper = new MeasureHelper(this);
         setSurfaceTextureListener(this);
     }
 
@@ -315,35 +278,27 @@ public class IjkVideoView extends TextureView implements TextureView.SurfaceText
     }
 
 
-    IMediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
+    private IMediaPlayer.OnVideoSizeChangedListener mSizeChangedListener =
             new IMediaPlayer.OnVideoSizeChangedListener() {
                 public void onVideoSizeChanged(IMediaPlayer mp, int width, int height, int sarNum, int sarDen) {
                     int videoWidth = mp.getVideoWidth();
                     int videoHeight = mp.getVideoHeight();
                     int videoSarNum = mp.getVideoSarNum();
                     int videoSarDen = mp.getVideoSarDen();
-                    if (videoWidth != 0 && videoHeight != 0) {
-                        if (mMeasureHelper != null) {
-                            mMeasureHelper.setVideoSize(videoWidth, videoHeight);
-                            mMeasureHelper.setVideoSampleAspectRatio(videoSarNum, videoSarDen);
-                            requestLayout();
-                        }
-                    }
+                    setVideoSize(videoWidth, videoHeight);
+                    setVideoSampleAspectRatio(videoSarNum, videoSarDen);
                 }
             };
 
-    IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
+    private IMediaPlayer.OnPreparedListener mPreparedListener = new IMediaPlayer.OnPreparedListener() {
         public void onPrepared(IMediaPlayer mp) {
             int videoWidth = mp.getVideoWidth();
             int videoHeight = mp.getVideoHeight();
             int videoSarNum = mp.getVideoSarNum();
             int videoSarDen = mp.getVideoSarDen();
             if (videoWidth != 0 && videoHeight != 0) {
-                if (mMeasureHelper != null) {
-                    mMeasureHelper.setVideoSize(videoWidth, videoHeight);
-                    mMeasureHelper.setVideoSampleAspectRatio(videoSarNum, videoSarDen);
-                    requestLayout();
-                }
+                setVideoSize(videoWidth, videoHeight);
+                setVideoSampleAspectRatio(videoSarNum, videoSarDen);
             }
 //            mHudViewHolder.updateLoadCost(mPrepareEndTime - mPrepareStartTime);
 

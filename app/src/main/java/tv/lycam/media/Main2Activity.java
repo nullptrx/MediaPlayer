@@ -3,7 +3,7 @@ package tv.lycam.media;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import tv.lycam.alivc.widget.IjkVideoView;
+import tv.lycam.alivc.widget.AliVideoView;
 
 public class Main2Activity extends AppCompatActivity {
     public static final String DEFAULT_TEST_URL_LIVE = "rtmp://live.hkstv.hk.lxdns.com/live/hks";
@@ -13,7 +13,7 @@ public class Main2Activity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        IjkVideoView player = findViewById(R.id.player);
+        AliVideoView player = findViewById(R.id.player);
         player.setVideoPath(DEFAULT_TEST_URL_VOD);
         player.start();
 

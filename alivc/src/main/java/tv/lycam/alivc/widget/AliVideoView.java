@@ -1,20 +1,24 @@
 package tv.lycam.alivc.widget;
 
 import android.content.Context;
+import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.TextureView;
 
 import com.alivc.player.AliVcMediaPlayer;
 import com.alivc.player.MediaPlayer;
+import com.alivc.player.ScalableType;
 import com.alivc.player.ScaleManager;
 import com.alivc.player.Size;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import tv.lycam.alivc.IMediaPlayer;
 import tv.lycam.alivc.PlayerState;
 import tv.lycam.alivc.utils.Debugger;
 
@@ -24,9 +28,30 @@ import tv.lycam.alivc.utils.Debugger;
  * @description
  */
 
-public class AliVideoView extends TextureView implements TextureView.SurfaceTextureListener {
+public class AliVideoView extends IVideoView implements TextureView.SurfaceTextureListener {
+
+    public static final String TAG = "AliVideoView";
+    // 默认缩放模式
+    protected MediaPlayer.VideoScalingMode DEFAULT_ASPECTRATIO = MediaPlayer.VideoScalingMode.VIDEO_SCALING_MODE_SCALE_TO_FIT;
+
 
     private AliVcMediaPlayer mMediaPlayer;
+
+    private ScaleManager mScaleManager;
+    // 变换
+    private ScalableType mScalableType = ScalableType.NONE;
+
+    private IMediaPlayer mIMediaPlayer;
+
+    // 当前播放状态
+    protected int mCurrentState = PlayerState.CURRENT_STATE_NORMAL;
+    // 备份缓存前的播放状态
+    protected int mBackUpPlayingBufferState = -1;
+    // 是否直播流
+    protected boolean isLiveStream;
+    protected String mStreamUrl;
+    // 判断是否播放过
+    private boolean hadPlay;
 
     public AliVideoView(Context context) {
         this(context, null);
@@ -39,6 +64,7 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
     public AliVideoView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initVodPlayer(context);
+        setSurfaceTextureListener(this);
     }
 
     @Override
@@ -124,7 +150,9 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
         @Override
         public void onPrepared() {
 //            if (mCurrentState != PlayerState.CURRENT_STATE_PREPAREING) return;
-            onMediaPrepared();
+            if (mIMediaPlayer != null) {
+                mIMediaPlayer.onMediaPrepared();
+            }
             mMediaPlayer.play();
             setStateAndUi(PlayerState.CURRENT_STATE_PLAYING);
             if (mOnPreparedListener != null) {
@@ -158,7 +186,9 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
                 default:
                     break;
             }
-            onMediaInfo(what, extra);
+            if (mIMediaPlayer != null) {
+                mIMediaPlayer.onMediaInfo(what, extra);
+            }
             if (mOnInfoListener != null) {
                 mOnInfoListener.onInfo(what, extra);
             }
@@ -172,7 +202,9 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
         public void onError(int errorCode, String msg) {
             setStateAndUi(PlayerState.CURRENT_STATE_ERROR);
             mMediaPlayer.stop();
-            onMediaError(errorCode, msg);
+            if (mIMediaPlayer != null) {
+                mIMediaPlayer.onMediaError(errorCode, msg);
+            }
             if (mOnErrorListener != null) {
                 mOnErrorListener.onError(errorCode, msg);
             }
@@ -184,7 +216,9 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
         @Override
         public void onCompleted() {
             setStateAndUi(PlayerState.CURRENT_STATE_AUTO_COMPLETE);
-            onMediaCompleted();
+            if (mIMediaPlayer != null) {
+                mIMediaPlayer.onMediaCompleted();
+            }
             if (mOnCompletedListener != null) {
                 mOnCompletedListener.onCompleted();
             }
@@ -194,7 +228,9 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
     private AliVcMediaPlayer.MediaPlayerBufferingUpdateListener mOnBaseBufferingUpdateListener = new AliVcMediaPlayer.MediaPlayerBufferingUpdateListener() {
         @Override
         public void onBufferingUpdateListener(int percent) {
-            onMediaBufferingUpdate(percent);
+            if (mIMediaPlayer != null) {
+                mIMediaPlayer.onMediaBufferingUpdate(percent);
+            }
             if (mOnBufferingUpdateListener != null) {
                 mOnBufferingUpdateListener.onBufferingUpdateListener(percent);
             }
@@ -204,7 +240,9 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
     private AliVcMediaPlayer.MediaPlayerVideoSizeChangeListener mOnBaseVideoSizeChangeListener = new AliVcMediaPlayer.MediaPlayerVideoSizeChangeListener() {
         @Override
         public void onVideoSizeChange(int width, int height) {
-            onMediaVideoSizeChange(width, height);
+            if (mIMediaPlayer != null) {
+                mIMediaPlayer.onMediaVideoSizeChange(width, height);
+            }
             if (mOnVideoSizeChangeListener != null) {
                 mOnVideoSizeChangeListener.onVideoSizeChange(width, height);
             }
@@ -214,7 +252,9 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
     private AliVcMediaPlayer.MediaPlayerSeekCompleteListener mOnBaseSeekCompleteListener = new AliVcMediaPlayer.MediaPlayerSeekCompleteListener() {
         @Override
         public void onSeekCompleted() {
-            onMediaSeekCompleted();
+            if (mIMediaPlayer != null) {
+                mIMediaPlayer.onMediaSeekCompleted();
+            }
         }
     };
 
@@ -222,7 +262,9 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
     private MediaPlayer.MediaPlayerFrameInfoListener mOnBaseFrameInfoListener = new MediaPlayer.MediaPlayerFrameInfoListener() {
         @Override
         public void onFrameInfoListener() {
-            onMediaFrameInfo();
+            if (mIMediaPlayer != null) {
+                mIMediaPlayer.onMediaFrameInfo();
+            }
             if (mOnFrameInfoListener != null) {
                 mOnFrameInfoListener.onFrameInfoListener();
             }
@@ -232,7 +274,7 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
     private MediaPlayer.MediaPlayerStoppedListener mOnBaseStoppedListener = new MediaPlayer.MediaPlayerStoppedListener() {
         @Override
         public void onStopped() {
-            mCurrentState = PlayerState.CURRENT_STATE_NORMAL;
+            setStateAndUi(PlayerState.CURRENT_STATE_NORMAL);
         }
     };
 
@@ -272,5 +314,105 @@ public class AliVideoView extends TextureView implements TextureView.SurfaceText
 
     public void setOnFrameInfoListener(AliVcMediaPlayer.MediaPlayerFrameInfoListener onFrameInfoListener) {
         mOnFrameInfoListener = onFrameInfoListener;
+    }
+
+    private void setStateAndUi(int state) {
+        if (state != PlayerState.CURRENT_STATE_NORMAL) {
+            hadPlay = true;
+        }
+        mCurrentState = state;
+        if (mIMediaPlayer != null) {
+            mIMediaPlayer.setStateAndUi(state);
+        }
+    }
+
+    /**
+     * 处理镜像旋转
+     * 注意，暂停时
+     */
+    protected void resolveTransform() {
+        if (mScaleManager != null) {
+            Matrix scaleMatrix = mScaleManager.getScaleMatrix(mScalableType);
+            setTransform(scaleMatrix);
+            invalidate();
+        }
+    }
+
+
+    public void setScalableType(ScalableType scalableType) {
+        this.mScalableType = scalableType;
+        resolveTransform();
+    }
+
+    public void setIMediaPlayer(IMediaPlayer IMediaPlayer) {
+        mIMediaPlayer = IMediaPlayer;
+    }
+
+    public void setVideoPath(String url) {
+        boolean isLiveStream = isLive(url);
+        setVideoPath(url, isLiveStream);
+    }
+
+    public void setVideoPath(String url, boolean isLiveStream) {
+        this.mStreamUrl = url;
+        this.isLiveStream = isLiveStream;
+    }
+
+    /**
+     * @param decoderType 解码器类型。0代表硬件解码器；1代表软件解码器。
+     */
+    public void setDefaultDecoder(int decoderType) {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setDefaultDecoder(decoderType);
+        }
+    }
+
+    public void pause() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.pause();
+            setStateAndUi(PlayerState.CURRENT_STATE_PAUSE);
+        }
+    }
+
+    public void resume() {
+        if (mCurrentState == PlayerState.CURRENT_STATE_PAUSE) {
+            if (mMediaPlayer != null) {
+                mMediaPlayer.play();
+                setStateAndUi(PlayerState.CURRENT_STATE_PLAYING);
+            }
+        }
+    }
+
+    protected void prepareAndPlay() {
+        if (TextUtils.isEmpty(mStreamUrl)) {
+            return;
+        }
+        if (mMediaPlayer != null) {
+            mMediaPlayer.setMediaType(isLiveStream ? MediaPlayer.MediaType.Live : MediaPlayer.MediaType.Vod);
+            mMediaPlayer.prepareAndPlay(mStreamUrl);
+            setStateAndUi(PlayerState.CURRENT_STATE_PREPAREING);
+        }
+    }
+
+    protected void stop() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.stop();
+            setStateAndUi(PlayerState.CURRENT_STATE_NORMAL);
+        }
+    }
+
+    protected void destroy() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.releaseVideoSurface();
+            mMediaPlayer.stop();
+            mMediaPlayer.destroy();
+        }
+    }
+
+    public void start() {
+        if (mMediaPlayer != null && hadPlay) {
+            mMediaPlayer.stop();
+        }
+        prepareAndPlay();
     }
 }

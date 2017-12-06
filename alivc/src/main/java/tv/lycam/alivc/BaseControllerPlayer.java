@@ -127,7 +127,7 @@ public abstract class BaseControllerPlayer extends BasePlayer {
     protected boolean mNeedShowWifiTip = true;
 
     //是否支持非全屏滑动触摸有效
-    protected boolean mIsTouchWiget = true;
+    protected boolean mIsTouchWidget = true;
 
     //是否支持全屏滑动触摸有效
     protected boolean mIsTouchWigetFull = true;
@@ -631,7 +631,7 @@ public abstract class BaseControllerPlayer extends BasePlayer {
                 float absDeltaX = Math.abs(deltaX);
                 float absDeltaY = Math.abs(deltaY);
                 if ((!mIsPortrait && mIsTouchWigetFull)
-                        || (mIsTouchWiget && mIsPortrait)) {
+                        || (mIsTouchWidget && mIsPortrait)) {
                     if (!mChangePosition && !mChangeVolume && !mBrightness) {
                         touchSurfaceMoveFullLogic(absDeltaX, absDeltaY);
                     }
@@ -987,8 +987,8 @@ public abstract class BaseControllerPlayer extends BasePlayer {
         isForbidChangePosition = forbidChangePosition;
     }
 
-    public void setTouchWiget(boolean touchWiget) {
-        mIsTouchWiget = touchWiget;
+    public void setTouchWidget(boolean touchWidget) {
+        mIsTouchWidget = touchWidget;
     }
 
     public void setTouchWigetFull(boolean touchWigetFull) {

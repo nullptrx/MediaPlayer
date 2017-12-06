@@ -25,4 +25,5 @@ public interface IMediaPlayer {
 
     void onMediaVideoSizeChange(int width, int height);
 
+    void setStateAndUi(int state);
 }
