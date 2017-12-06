@@ -1,7 +1,6 @@
 package tv.lycam.player.widget;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
@@ -13,9 +12,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.ViewGroup;
-import android.view.ViewParent;
-import android.widget.ImageView;
 
 import com.alivc.player.ScalableType;
 import com.alivc.player.ScaleManager;
@@ -54,8 +50,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
     // 变换
     private ScalableType mScalableType = ScalableType.NONE;
     private boolean isLiveStream;
-    private Bitmap mPauseBitmap;
-    private ImageView mPauseView;
 
     public IjkVideoView(Context context) {
         this(context, null);
@@ -319,13 +313,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
     public void pause() {
         if (mCurrentState == PlayerState.CURRENT_STATE_PLAYING) {
             if (mMediaPlayer.isPlaying()) {
-                ViewParent parent = getParent();
-                if (parent != null && parent instanceof ViewGroup) {
-                    mPauseBitmap = getBitmap();
-                    mPauseView = new ImageView(getContext());
-                    mPauseView.setImageBitmap(mPauseBitmap);
-                    ((ViewGroup) parent).addView(mPauseView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                }
                 mMediaPlayer.pause();
                 mSeekWhenPrepared = (int) mMediaPlayer.getCurrentPosition();
                 setStateAndUi(PlayerState.CURRENT_STATE_PAUSE);
@@ -468,17 +455,9 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
                 mIMediaStatus.onMediaPrepared();
             }
             mMediaPlayer.start();
-            if (mPauseView != null) {
-                mPauseView.setImageBitmap(null);
-            }
-            if (mPauseBitmap != null) {
-                mPauseBitmap.recycle();
-            }
-            ViewParent parent = getParent();
-            if (parent != null && parent instanceof ViewGroup) {
-                ((ViewGroup) parent).removeView(mPauseView);
-            }
+
             setStateAndUi(PlayerState.CURRENT_STATE_PLAYING);
+
         }
     };
 
@@ -653,4 +632,5 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
             mMediaPlayer.setVolume(leftVolume, rightVolume);
         }
     }
+
 }
