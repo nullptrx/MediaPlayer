@@ -5,8 +5,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <tv.lycam.alivc.widget.AliVideoView
-        android:id="@+id/player"
+    <tv.lycam.player.widget.AliVideoView
+        android:id="@+id/player_ali"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <tv.lycam.player.widget.IjkVideoView
+        android:id="@+id/player_ijk"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 

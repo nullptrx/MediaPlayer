@@ -1,1 +1,1 @@
-include ':app', ':player', ':aliyunplayer', ':test', ':alivc'
+include ':app', ':pldroid', ':alivc', ':test', ':player'

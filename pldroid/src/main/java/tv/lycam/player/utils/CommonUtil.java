@@ -1,14 +1,11 @@
 package tv.lycam.player.utils;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.ContextThemeWrapper;
 import android.util.DisplayMetrics;
@@ -47,11 +44,9 @@ public class CommonUtil {
 
     public static boolean isWifiConnected(Context context) {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        if (connectivityManager != null) {
-            NetworkInfo wifiNetworkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-            if (wifiNetworkInfo.isConnected()) {
-                return true;
-            }
+        NetworkInfo wifiNetworkInfo = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        if (wifiNetworkInfo.isConnected()) {
+            return true;
         }
         return false;
     }
@@ -125,52 +120,6 @@ public class CommonUtil {
         ((Activity) context).getWindow().getDecorView().setSystemUiVisibility(systemUiVisibility);
     }
 
-    @SuppressLint("RestrictedApi")
-    public static void hideSupportActionBar(Context context, boolean actionBar, boolean statusBar) {
-        if (actionBar) {
-            AppCompatActivity appCompatActivity = CommonUtil.getAppCompActivity(context);
-            if (appCompatActivity != null) {
-                ActionBar ab = appCompatActivity.getSupportActionBar();
-                if (ab != null) {
-                    ab.setShowHideAnimationEnabled(false);
-                    ab.hide();
-                }
-            }
-        }
-        if (statusBar) {
-            if (context instanceof FragmentActivity) {
-                FragmentActivity fragmentActivity = (FragmentActivity) context;
-                fragmentActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                        WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            } else {
-                CommonUtil.getAppCompActivity(context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                        WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            }
-        }
-    }
-
-    @SuppressLint("RestrictedApi")
-    public static void showSupportActionBar(Context context, boolean actionBar, boolean statusBar) {
-        if (actionBar) {
-            AppCompatActivity appCompatActivity = CommonUtil.getAppCompActivity(context);
-            if (appCompatActivity != null) {
-                ActionBar ab = appCompatActivity.getSupportActionBar();
-                if (ab != null) {
-                    ab.setShowHideAnimationEnabled(false);
-                    ab.show();
-                }
-            }
-        }
-
-        if (statusBar) {
-            if (context instanceof FragmentActivity) {
-                FragmentActivity fragmentActivity = (FragmentActivity) context;
-                fragmentActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            } else {
-                CommonUtil.getAppCompActivity(context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            }
-        }
-    }
 
     /**
      * Get AppCompatActivity from context

@@ -9,7 +9,6 @@ import android.widget.FrameLayout;
 
 import tv.lycam.player.R;
 
-
 /**
  * Created by Modificator on 2015/8/22.
  */

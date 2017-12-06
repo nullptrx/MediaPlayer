@@ -68,7 +68,7 @@ public class AudioMngHelper {
      *
      * @param context 上下文
      */
-    private AudioMngHelper(Context context) {
+    public AudioMngHelper(Context context) {
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
     }
 
