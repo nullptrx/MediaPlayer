@@ -257,7 +257,7 @@ public abstract class BaseControllerPlayer extends BasePlayer {
     @Override
     public void onMediaFrameInfo() {
         super.onMediaFrameInfo();
-        updatePausePlay();
+        showPause();
         setProgress();
     }
 
@@ -512,6 +512,34 @@ public abstract class BaseControllerPlayer extends BasePlayer {
             });
         }
 
+    }
+
+    private void showPause() {
+        if (mPauseButton == null)
+            return;
+        Activity activity = CommonUtil.getActivityContext(mContext);
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mPauseButton.setImageResource(getIconMediaPauseId());
+                }
+            });
+        }
+    }
+
+    private void showPlay() {
+        if (mPauseButton == null)
+            return;
+        Activity activity = CommonUtil.getActivityContext(mContext);
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mPauseButton.setImageResource(getIconMediaStartId());
+                }
+            });
+        }
     }
 
     private void doPause() {
@@ -877,7 +905,7 @@ public abstract class BaseControllerPlayer extends BasePlayer {
                 changeUiToError();
                 break;
             case PlayerState.CURRENT_STATE_AUTO_COMPLETE:
-                updatePausePlay();
+                showPlay();
                 changeUiToCompleteShow();
                 cancelDismissControlViewTimer();
                 break;
@@ -900,12 +928,12 @@ public abstract class BaseControllerPlayer extends BasePlayer {
                 resetProgressAndTime();
                 break;
             case PlayerState.CURRENT_STATE_PLAYING:
-                updatePausePlay();
+                showPause();
                 enableProgressBar();
                 startProgressTimer();
                 break;
             case PlayerState.CURRENT_STATE_PAUSE:
-                updatePausePlay();
+                showPlay();
                 disableProgressBar();
                 startProgressTimer();
                 break;
