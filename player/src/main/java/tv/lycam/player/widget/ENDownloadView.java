@@ -38,9 +38,9 @@ public class ENDownloadView extends View {
 
     private static final int DEFAULT_TEXT_COLOR = Color.WHITE;
 
-    private static final int DEFAULT_LINE_WIDTH = 4;
+    private static final int DEFAULT_LINE_WIDTH = 4;    // 9
 
-    private static final int DEFAULT_BG_LINE_WIDTH = 4;
+    private static final int DEFAULT_BG_LINE_WIDTH = 4; // 9
 
     private static final int DEFAULT_TEXT_SIZE = 14;
 

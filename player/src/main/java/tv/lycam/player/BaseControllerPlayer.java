@@ -905,6 +905,7 @@ public abstract class BaseControllerPlayer extends BasePlayer {
                 startProgressTimer();
                 break;
             case PlayerState.CURRENT_STATE_PAUSE:
+                updatePausePlay();
                 disableProgressBar();
                 startProgressTimer();
                 break;
