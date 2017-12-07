@@ -166,9 +166,6 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
             }
             mMediaPlayer.play();
             setStateAndUi(PlayerState.CURRENT_STATE_PLAYING);
-            if (mOnPreparedListener != null) {
-                mOnPreparedListener.onPrepared();
-            }
         }
     };
 
@@ -200,9 +197,6 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
             if (mIMediaStatus != null) {
                 mIMediaStatus.onMediaInfo(what, extra);
             }
-            if (mOnInfoListener != null) {
-                mOnInfoListener.onInfo(what, extra);
-            }
         }
 
     };
@@ -216,9 +210,6 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
             if (mIMediaStatus != null) {
                 mIMediaStatus.onMediaError(errorCode, msg);
             }
-            if (mOnErrorListener != null) {
-                mOnErrorListener.onError(errorCode, msg);
-            }
         }
     };
 
@@ -230,9 +221,6 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
             if (mIMediaStatus != null) {
                 mIMediaStatus.onMediaCompleted();
             }
-            if (mOnCompletedListener != null) {
-                mOnCompletedListener.onCompleted();
-            }
         }
     };
 
@@ -241,9 +229,6 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
         public void onBufferingUpdateListener(int percent) {
             if (mIMediaStatus != null) {
                 mIMediaStatus.onMediaBufferingUpdate(percent);
-            }
-            if (mOnBufferingUpdateListener != null) {
-                mOnBufferingUpdateListener.onBufferingUpdateListener(percent);
             }
         }
     };
@@ -256,9 +241,6 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
             setVideoSize(videoWidth, videoHeight);
             if (mIMediaStatus != null) {
                 mIMediaStatus.onMediaVideoSizeChange(width, height);
-            }
-            if (mOnVideoSizeChangeListener != null) {
-                mOnVideoSizeChangeListener.onVideoSizeChange(width, height);
             }
         }
     };
@@ -279,9 +261,6 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
             if (mIMediaStatus != null) {
                 mIMediaStatus.onMediaFrameInfo();
             }
-            if (mOnFrameInfoListener != null) {
-                mOnFrameInfoListener.onFrameInfoListener();
-            }
         }
     };
 
@@ -291,44 +270,6 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
             setStateAndUi(PlayerState.CURRENT_STATE_NORMAL);
         }
     };
-
-
-    private AliVcMediaPlayer.MediaPlayerPreparedListener mOnPreparedListener;
-    private AliVcMediaPlayer.MediaPlayerInfoListener mOnInfoListener;
-    private AliVcMediaPlayer.MediaPlayerErrorListener mOnErrorListener;
-    private AliVcMediaPlayer.MediaPlayerCompletedListener mOnCompletedListener;
-    private AliVcMediaPlayer.MediaPlayerBufferingUpdateListener mOnBufferingUpdateListener;
-    private AliVcMediaPlayer.MediaPlayerVideoSizeChangeListener mOnVideoSizeChangeListener;
-    private AliVcMediaPlayer.MediaPlayerFrameInfoListener mOnFrameInfoListener;
-
-
-    public void setOnPreparedListener(AliVcMediaPlayer.MediaPlayerPreparedListener onPreparedListener) {
-        mOnPreparedListener = onPreparedListener;
-    }
-
-    public void setOnInfoListener(AliVcMediaPlayer.MediaPlayerInfoListener onInfoListener) {
-        mOnInfoListener = onInfoListener;
-    }
-
-    public void setOnErrorListener(AliVcMediaPlayer.MediaPlayerErrorListener onErrorListener) {
-        mOnErrorListener = onErrorListener;
-    }
-
-    public void setOnCompletedListener(AliVcMediaPlayer.MediaPlayerCompletedListener onCompletedListener) {
-        mOnCompletedListener = onCompletedListener;
-    }
-
-    public void setOnBufferingUpdateListener(AliVcMediaPlayer.MediaPlayerBufferingUpdateListener onBufferingUpdateListener) {
-        mOnBufferingUpdateListener = onBufferingUpdateListener;
-    }
-
-    public void setOnVideoSizeChangeListener(AliVcMediaPlayer.MediaPlayerVideoSizeChangeListener onVideoSizeChangeListener) {
-        mOnVideoSizeChangeListener = onVideoSizeChangeListener;
-    }
-
-    public void setOnFrameInfoListener(AliVcMediaPlayer.MediaPlayerFrameInfoListener onFrameInfoListener) {
-        mOnFrameInfoListener = onFrameInfoListener;
-    }
 
     protected void setStateAndUi(int state) {
         if (state != PlayerState.CURRENT_STATE_NORMAL) {

@@ -212,7 +212,6 @@ public abstract class BasePlayer extends RatioFrameLayout implements IMediaStatu
         }
     }
 
-
     public void onMediaPrepared() {
     }
 

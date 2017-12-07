@@ -42,10 +42,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
     // 备份缓存前的播放状态
     protected int mBackUpPlayingBufferState = -1;
     private Context mContext;
-    private IMediaPlayer.OnCompletionListener mOnCompletionListener;
-    private IMediaPlayer.OnPreparedListener mOnPreparedListener;
-    private IMediaPlayer.OnErrorListener mOnErrorListener;
-    private IMediaPlayer.OnInfoListener mOnInfoListener;
     private ScaleManager mScaleManager;
     // 变换
     private ScalableType mScalableType = ScalableType.NONE;
@@ -445,10 +441,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
             // Get the capabilities of the player for this stream
             // REMOVED: Metadata
 
-            if (mOnPreparedListener != null) {
-                mOnPreparedListener.onPrepared(mMediaPlayer);
-            }
-
             int seekToPosition = mSeekWhenPrepared;  // mSeekWhenPrepared may be changed after seekTo() call
             if (seekToPosition != 0) {
                 seekTo(seekToPosition);
@@ -493,9 +485,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
             if (mIMediaStatus != null) {
                 mIMediaStatus.onMediaInfo(what, extra);
             }
-            if (mOnInfoListener != null) {
-                mOnInfoListener.onInfo(mp, what, extra);
-            }
             return true;
         }
     };
@@ -533,13 +522,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
                         mIMediaStatus.onMediaError(framework_err, msg);
                     }
 
-                    /* If an error handler has been supplied, use it and finish. */
-                    if (mOnErrorListener != null) {
-                        if (mOnErrorListener.onError(mMediaPlayer, framework_err, impl_err)) {
-                            return true;
-                        }
-                    }
-
                     return true;
                 }
             };
@@ -550,9 +532,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
                     setStateAndUi(PlayerState.CURRENT_STATE_AUTO_COMPLETE);
                     if (mIMediaStatus != null) {
                         mIMediaStatus.onMediaCompleted();
-                    }
-                    if (mOnCompletionListener != null) {
-                        mOnCompletionListener.onCompletion(mMediaPlayer);
                     }
                 }
             };
@@ -583,48 +562,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
         public void onTimedText(IMediaPlayer mp, IjkTimedText text) {
         }
     };
-
-    /**
-     * Register a callback to be invoked when the media file
-     * is loaded and ready to go.
-     *
-     * @param l The callback that will be run
-     */
-    public void setOnPreparedListener(IMediaPlayer.OnPreparedListener l) {
-        mOnPreparedListener = l;
-    }
-
-    /**
-     * Register a callback to be invoked when the end of a media file
-     * has been reached during playback.
-     *
-     * @param l The callback that will be run
-     */
-    public void setOnCompletionListener(IMediaPlayer.OnCompletionListener l) {
-        mOnCompletionListener = l;
-    }
-
-    /**
-     * Register a callback to be invoked when an error occurs
-     * during playback or setup.  If no listener is specified,
-     * or if the listener returned false, VideoView will inform
-     * the user of any errors.
-     *
-     * @param l The callback that will be run
-     */
-    public void setOnErrorListener(IMediaPlayer.OnErrorListener l) {
-        mOnErrorListener = l;
-    }
-
-    /**
-     * Register a callback to be invoked when an informational event
-     * occurs during playback or setup.
-     *
-     * @param l The callback that will be run
-     */
-    public void setOnInfoListener(IMediaPlayer.OnInfoListener l) {
-        mOnInfoListener = l;
-    }
 
     /**
      * 设置声音
