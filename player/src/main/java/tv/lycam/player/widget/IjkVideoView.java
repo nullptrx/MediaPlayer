@@ -46,6 +46,8 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
     // 变换
     private ScalableType mScalableType = ScalableType.NONE;
     private boolean isLiveStream;
+    // 是否启用播放器日志
+    private boolean isLogEnabled = false;
 
     public IjkVideoView(Context context) {
         this(context, null);
@@ -63,6 +65,7 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
 
     private void initRender(Context context) {
         mContext = context;
+        disableNativeLog();
     }
 
     @Override
@@ -87,30 +90,39 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
 
         mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "http-detect-range-support", 0);
 
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-buffer-size", 1024 * 400);
+//        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max-buffer-size", 1024 * 400);
         // 超时时间
         // https://www.ffmpeg.org/ffmpeg-protocols.html#http
         // https://ffmpeg.org/ffmpeg-protocols.html#toc-rtmp
         mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "timeout", 60_000_000);
         // 重连次数
-//                    mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "reconnect", 5);
-
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", 1000);
-//                    mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1);
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", "5000");
+        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "reconnect", 1);
+        // 设置以下参数容易导致解码音频失败
+//        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "analyzeduration", 1_000_000);
+//        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "probesize", 4096);
+        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "fflags", "nobuffer");
 
 //      mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "mediacodec_mpeg4", 1);
 
-        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 0);
+//        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_loop_filter", 0);
+//        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_frame", 5);
 //            mediaPlayer.setLooping(true);
         mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "sync", "ext");
 //                mediaPlayer.setSpeed(1.03f);
         mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "enable-accurate-seek", 1);
 
 //      mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "min-frames", 20);
-//      mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_CODEC, "skip_frame", 5);
-//      mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0);
+        // 设置在解析的 url 之前 （这里设置超时为5秒）
+        // 如果没有设置stimeout，在解析时（也就是avformat_open_input）把网线拔掉，av_read_frame会阻塞（时间单位是微妙）
+        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "stimeout", "5000000");
+        // 最大缓冲cache是3s， 有时候网络波动，会突然在短时间内收到好几秒的数据
+        // 因此需要播放器丢包，才不会累积延时
+        // 这个和第三个参数packet-buffering无关。
+        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max_cached_duration", 3000);
+        // 无限制收流
+//        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1);
+        // 设置无缓冲，这是播放器的缓冲区，有数据就播放
+        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0);
         return mediaPlayer;
     }
 
@@ -249,12 +261,16 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
             mMediaPlayer.setOnTimedTextListener(mOnTimedTextListener);
             mMediaPlayer.setDataSource(mContext, mUri, mHeaders);
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setScreenOnWhilePlaying(true);
             SurfaceTexture texture = getSurfaceTexture();
             if (texture != null) {
                 Surface surface = new Surface(texture);
                 mMediaPlayer.setSurface(surface);
                 surface.release();
+            }
+            if (isLogEnabled) {
+                IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
+            } else {
+                IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_SILENT);
             }
         } catch (IOException | RuntimeException ex) {
             Log.w(TAG, "Unable to open content: " + mUri, ex);
@@ -348,13 +364,18 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
 
     @Override
     public void enableNativeLog() {
-        IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
+        this.isLogEnabled = true;
+        if (mMediaPlayer != null) {
+            IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_DEBUG);
+        }
     }
 
     @Override
     public void disableNativeLog() {
-        IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_SILENT);
-
+        isLogEnabled = false;
+        if (mMediaPlayer != null) {
+            IjkMediaPlayer.native_setLogLevel(IjkMediaPlayer.IJK_LOG_ERROR);
+        }
     }
 
     public int getDuration() {

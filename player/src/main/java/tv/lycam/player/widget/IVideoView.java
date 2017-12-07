@@ -9,7 +9,7 @@ import com.alivc.player.ScalableType;
 
 import java.util.regex.Pattern;
 
-import tv.lycam.player.IMediaStatus;
+import tv.lycam.player.callback.IMediaStatus;
 import tv.lycam.player.utils.MeasureHelper;
 
 /**

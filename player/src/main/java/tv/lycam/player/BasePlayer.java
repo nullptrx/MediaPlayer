@@ -20,6 +20,7 @@ import android.widget.RelativeLayout;
 
 import com.alivc.player.ScalableType;
 
+import tv.lycam.player.callback.IMediaStatus;
 import tv.lycam.player.ratio.RatioFrameLayout;
 import tv.lycam.player.utils.CommonUtil;
 import tv.lycam.player.widget.AliVideoView;
@@ -47,6 +48,8 @@ public abstract class BasePlayer extends RatioFrameLayout implements IMediaStatu
     private IVideoView mMediaPlayer;
 
     private boolean mPausing;
+
+    private IMediaStatus mMediaStatus;
 
     // 当前播放状态
     protected int mCurrentState = PlayerState.CURRENT_STATE_NORMAL;
@@ -212,33 +215,64 @@ public abstract class BasePlayer extends RatioFrameLayout implements IMediaStatu
         }
     }
 
+    public void setMediaStatus(IMediaStatus mediaStatus) {
+        mMediaStatus = mediaStatus;
+    }
+
     public void onMediaPrepared() {
+        if (mMediaStatus != null) {
+            mMediaStatus.onMediaPrepared();
+        }
     }
 
     public void onMediaInfo(int what, int extra) {
+        if (mMediaStatus != null) {
+            mMediaStatus.onMediaInfo(what, extra);
+        }
     }
 
     public void onMediaError(int errorCode, String msg) {
+        if (mMediaStatus != null) {
+            mMediaStatus.onMediaError(errorCode, msg);
+        }
     }
 
     public void onMediaCompleted() {
+        if (mMediaStatus != null) {
+            mMediaStatus.onMediaCompleted();
+        }
     }
 
     public void onMediaSeekCompleted() {
+        if (mMediaStatus != null) {
+            mMediaStatus.onMediaSeekCompleted();
+        }
     }
 
     // 更新进度时间
     public void onMediaFrameInfo() {
+        if (mMediaStatus != null) {
+            mMediaStatus.onMediaFrameInfo();
+        }
     }
 
     public void onMediaBufferingUpdate(int percent) {
+        if (mMediaStatus != null) {
+            mMediaStatus.onMediaBufferingUpdate(percent);
+        }
     }
 
     public void onMediaVideoSizeChange(int width, int height) {
+        if (mMediaStatus != null) {
+            mMediaStatus.onMediaVideoSizeChange(width, height);
+        }
     }
 
     public void setStateAndUi(int state) {
         mCurrentState = state;
+        if (mMediaStatus != null) {
+            mMediaStatus.setStateAndUi(state);
+        }
     }
 
     private int stateToSave;
@@ -396,4 +430,17 @@ public abstract class BasePlayer extends RatioFrameLayout implements IMediaStatu
     public String getVideoPath() {
         return mMediaPlayer != null ? mMediaPlayer.getVideoPath() : "";
     }
+
+    public void enableNativeLog() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.enableNativeLog();
+        }
+    }
+
+    public void disableNativeLog() {
+        if (mMediaPlayer != null) {
+            mMediaPlayer.disableNativeLog();
+        }
+    }
+
 }

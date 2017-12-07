@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         ImageView imageView = new ImageView(this);
         imageView.setImageResource(R.mipmap.ic_launcher_round);
         mPlayer = findViewById(R.id.player);
+        mPlayer.enableNativeLog();
         mPlayer.setThumbImageView(imageView);
         View view = View.inflate(this, R.layout.item_main_topcontainner, null);
 
