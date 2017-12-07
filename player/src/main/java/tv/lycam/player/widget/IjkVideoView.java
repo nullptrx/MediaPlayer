@@ -120,7 +120,7 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
         // 这个和第三个参数packet-buffering无关。
         mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "max_cached_duration", 3000);
         // 无限制收流
-//        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1);
+        mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_FORMAT, "infbuf", 1);
         // 设置无缓冲，这是播放器的缓冲区，有数据就播放
         mediaPlayer.setOption(IjkMediaPlayer.OPT_CATEGORY_PLAYER, "packet-buffering", 0);
         return mediaPlayer;
