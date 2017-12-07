@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 //        mPlayer.setTopContainerView(view);
         //设置旋转
         orientationUtils = new OrientationUtils(this);
-        mPlayer.setVideoPath(DEFAULT_TEST_URL_LIVE);
+        mPlayer.setVideoPath(DEFAULT_TEST_URL_VOD);
         mPlayer.start();
         netWatchdog = new NetWatchdog(this);
         netWatchdog.setNetChangeListener(new NetWatchdog.NetChangeListener() {

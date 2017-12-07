@@ -230,7 +230,7 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
         mUri = uri;
         mHeaders = headers;
         mSeekWhenPrepared = 0;
-        initIjkPlayer();
+        setStateAndUi(PlayerState.CURRENT_STATE_NORMAL);
         requestLayout();
         invalidate();
     }
@@ -260,7 +260,6 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
                 mMediaPlayer.setSurface(surface);
                 surface.release();
             }
-            setStateAndUi(PlayerState.CURRENT_STATE_NORMAL);
         } catch (IOException | RuntimeException ex) {
             Log.w(TAG, "Unable to open content: " + mUri, ex);
             setStateAndUi(PlayerState.CURRENT_STATE_ERROR);
@@ -279,18 +278,16 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
             mMediaPlayer = null;
             // REMOVED: mPendingSubtitleTracks.clear();
             mCurrentState = PlayerState.CURRENT_STATE_NORMAL;
-        }
-        AudioManager am = (AudioManager) mContext.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
-        if (am != null) {
-            am.abandonAudioFocus(null);
+            AudioManager am = (AudioManager) mContext.getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
+            if (am != null) {
+                am.abandonAudioFocus(null);
+            }
         }
     }
 
     private void stopPlayback() {
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
-            mMediaPlayer.release();
-            mMediaPlayer = null;
         }
     }
 
@@ -299,6 +296,10 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
         if (mUri == null || TextUtils.isEmpty(mUri.getPath())) {
             return;
         }
+        if (PlayerState.CURRENT_STATE_PREPAREING == mCurrentState) {
+            return;
+        }
+        initIjkPlayer();
         if (mMediaPlayer != null) {
             mMediaPlayer.prepareAsync();
             setStateAndUi(PlayerState.CURRENT_STATE_PREPAREING);
@@ -323,9 +324,9 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
     @Override
     public void resume() {
         if (mCurrentState == PlayerState.CURRENT_STATE_PAUSE) {
-            initIjkPlayer();
             if (mMediaPlayer != null) {
-                mMediaPlayer.prepareAsync();
+                mMediaPlayer.start();
+                setStateAndUi(PlayerState.CURRENT_STATE_PLAYING);
             }
         }
     }
@@ -346,6 +347,7 @@ public class IjkVideoView extends IVideoView implements TextureView.SurfaceTextu
     @Override
     public void destroy() {
         stopPlayback();
+        release();
     }
 
     @Override

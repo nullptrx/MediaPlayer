@@ -601,7 +601,7 @@ public class StandardPlayer extends BaseControllerPlayer {
     }
 
     /***
-     * 设置封面
+     * 设置container
      */
     public void setTopContainerView(View view) {
         if (mTopContainerViewLayout != null) {
