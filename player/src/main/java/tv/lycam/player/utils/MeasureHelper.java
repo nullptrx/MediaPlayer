@@ -230,7 +230,7 @@ public final class MeasureHelper {
             }
             if (widthSpecMode == View.MeasureSpec.AT_MOST && heightSpecMode == View.MeasureSpec.AT_MOST) {
                 float specAspectRatio = (float) widthSpecSize / (float) heightSpecSize;
-                if (mVideoRotationDegree == 90 || mVideoRotationDegree == 270)
+                if (mVideoRotationDegree == 0 || mVideoRotationDegree == 180)
                     displayAspectRatio = 1.0f / displayAspectRatio;
                 boolean shouldBeWider = displayAspectRatio > specAspectRatio;
                 if (shouldBeWider) {
