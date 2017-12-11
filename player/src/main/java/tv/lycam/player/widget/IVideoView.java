@@ -70,6 +70,7 @@ public abstract class IVideoView extends TextureView {
         if (mMeasureHelper != null) {
             mMeasureHelper.setVideoRotation(degree);
         }
+//        setRotation(degree);
     }
 
     public void setAspectRatio(int aspectRatio) {
