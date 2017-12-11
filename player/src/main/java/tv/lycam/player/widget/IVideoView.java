@@ -1,8 +1,11 @@
 package tv.lycam.player.widget;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.support.annotation.IntRange;
 import android.util.AttributeSet;
+import android.view.Surface;
 import android.view.TextureView;
 
 import com.alivc.player.ScalableType;
@@ -49,6 +52,11 @@ public abstract class IVideoView extends TextureView {
             mMeasureHelper.setVideoSize(videoWidth, videoHeight);
             requestLayout();
         }
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setVideoRotation(90);
+        } else {
+            setVideoRotation(0);
+        }
     }
 
     public void setVideoSampleAspectRatio(int videoSarNum, int videoSarDen) {
@@ -61,7 +69,6 @@ public abstract class IVideoView extends TextureView {
     public void setVideoRotation(int degree) {
         if (mMeasureHelper != null) {
             mMeasureHelper.setVideoRotation(degree);
-            setRotation(degree);
         }
     }
 
@@ -74,8 +81,42 @@ public abstract class IVideoView extends TextureView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mMeasureHelper.doMeasure(widthMeasureSpec, heightMeasureSpec);
+        mMeasureHelper.doMeasure_16_9(widthMeasureSpec, heightMeasureSpec);
         setMeasuredDimension(mMeasureHelper.getMeasuredWidth(), mMeasureHelper.getMeasuredHeight());
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            setVideoRotation(90);
+        } else {
+            setVideoRotation(0);
+        }
+    }
+
+    /**
+     * 获取当前屏幕旋转角度
+     *
+     * @param activity
+     * @return 0表示是竖屏; 90表示是左横屏; 180表示是反向竖屏; 270表示是右横屏
+     */
+    public static int getDisplayRotation(Activity activity) {
+        if (activity == null)
+            return 0;
+        int rotation = activity.getWindowManager().getDefaultDisplay()
+                .getRotation();
+        switch (rotation) {
+            case Surface.ROTATION_0:
+                return 0;
+            case Surface.ROTATION_90:
+                return 90;
+            case Surface.ROTATION_180:
+                return 180;
+            case Surface.ROTATION_270:
+                return 270;
+        }
+        return 0;
     }
 
     /**

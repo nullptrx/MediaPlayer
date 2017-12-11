@@ -118,7 +118,6 @@ public final class MeasureHelper {
                         break;
                 }
                 boolean shouldBeWider = displayAspectRatio > specAspectRatio;
-
                 switch (mCurrentAspectRatio) {
                     case IRenderView.AR_ASPECT_FIT_PARENT:
                     case IRenderView.AR_16_9_FIT_PARENT:
@@ -200,6 +199,64 @@ public final class MeasureHelper {
                     width = widthSpecSize;
                     height = width * mVideoHeight / mVideoWidth;
                 }
+            }
+        } else {
+            // no size yet, just adopt the given spec sizes
+        }
+
+        mMeasuredWidth = width;
+        mMeasuredHeight = height;
+    }
+
+    public void doMeasure_16_9(int widthMeasureSpec, int heightMeasureSpec) {
+        //Log.i("@@@@", "onMeasure(" + MeasureSpec.toString(widthMeasureSpec) + ", "
+        //        + MeasureSpec.toString(heightMeasureSpec) + ")");
+        int width = View.getDefaultSize(mVideoWidth, widthMeasureSpec);
+        int height = View.getDefaultSize(mVideoHeight, heightMeasureSpec);
+        if (mCurrentAspectRatio == IRenderView.AR_MATCH_PARENT) {
+            width = widthMeasureSpec;
+            height = heightMeasureSpec;
+        } else if (mVideoWidth > 0 && mVideoHeight > 0) {
+            int widthSpecMode = View.MeasureSpec.getMode(widthMeasureSpec);
+            int widthSpecSize = View.MeasureSpec.getSize(widthMeasureSpec);
+            int heightSpecMode = View.MeasureSpec.getMode(heightMeasureSpec);
+            int heightSpecSize = View.MeasureSpec.getSize(heightMeasureSpec);
+
+            float displayAspectRatio;
+            if (mVideoWidth > mVideoHeight) {
+                displayAspectRatio = 16.0f / 9.0f;
+            } else {
+                displayAspectRatio = 9.0f / 16.0f;
+            }
+            if (widthSpecMode == View.MeasureSpec.AT_MOST && heightSpecMode == View.MeasureSpec.AT_MOST) {
+                float specAspectRatio = (float) widthSpecSize / (float) heightSpecSize;
+                if (mVideoRotationDegree == 90 || mVideoRotationDegree == 270)
+                    displayAspectRatio = 1.0f / displayAspectRatio;
+                boolean shouldBeWider = displayAspectRatio > specAspectRatio;
+                if (shouldBeWider) {
+                    // too wide, fix width
+                    width = widthSpecSize;
+                    height = (int) (width / displayAspectRatio);
+                } else {
+                    // too high, fix height
+                    height = heightSpecSize;
+                    width = (int) (height * displayAspectRatio);
+                }
+            } else {
+                // the size is fixed
+                if (mVideoRotationDegree == 0 || mVideoRotationDegree == 180) {
+                    if (mVideoWidth > mVideoHeight) {
+                        width = widthSpecSize;
+                        height = (int) (width / displayAspectRatio);
+                    } else {
+                        height = heightSpecSize;
+                        width = (int) (height / displayAspectRatio);
+                    }
+                } else {
+                    width = widthSpecSize;
+                    height = heightSpecSize;
+                }
+
             }
         } else {
             // no size yet, just adopt the given spec sizes
