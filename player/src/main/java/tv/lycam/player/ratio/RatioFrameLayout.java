@@ -33,6 +33,8 @@ public class RatioFrameLayout extends FrameLayout {
      * 判断是否竖屏, 默认竖屏
      */
     protected boolean mIsPortrait = true;
+    // 是否启用高宽比例控制, 默认true
+    private boolean ratioEnabled = true;
 
 
     @Override
@@ -58,13 +60,16 @@ public class RatioFrameLayout extends FrameLayout {
         ratioWidth = typedArray.getFloat(R.styleable.RatioLayout_ratioWidth, DEFAULT_RATIO_WIDTH);
         //获取高比例
         ratioHeight = typedArray.getFloat(R.styleable.RatioLayout_ratioHeight, DEFAULT_RATIO_HEIGHT);
+
+        ratioEnabled = typedArray.getBoolean(R.styleable.RatioLayout_ratioEnabled, true);
+
         typedArray.recycle();
 
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (!mIsPortrait) {
+        if (!mIsPortrait || !ratioEnabled) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
             return;
         }

@@ -29,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String DEFAULT_TEST_URL_LIVE = "rtmp://live.hkstv.hk.lxdns.com/live/hks";
     public static final String DEFAULT_TEST_URL_VOD = "http://resource-s3.lycam.tv/apps/KQWCUPAHR3/db4ded30-b0a1-11e7-aee5-25404b4da7c9/streams/dev-f31cebf1-c5b9-11e7-8270-61eef27bc007/hls/vod.m3u8";
     public static final String DEFAULT_TEST_URL_MP4 = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
+    public static final String DEFAULT_TEST_LOCAL_MP4 = "/storage/emulated/0/手播课/target/手播课宣传片.mp4";
     private static final int REQUEST_CODE_WRITE_SETTINGS = 1;
     //    public static final String DEFAULT_TEST_URL_VOD = "http://video.mb.moko.cc/2017-10-16/d4908bbd-97ab-443b-8742-f446498e2695.mp4/0306e508-9d4b-4578-9874-35b82f33fa14.m3u8";
 //    public static final String DEFAUL\T_TEST_URL = "http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f30.mp4";
@@ -49,10 +50,10 @@ public class MainActivity extends AppCompatActivity {
         mPlayer.setThumbImageView(imageView);
         View view = View.inflate(this, R.layout.item_main_topcontainner, null);
 
-//        mPlayer.setTopContainerView(view);
+        mPlayer.setTopContainerView(view);
         //设置旋转
         orientationUtils = new OrientationUtils(this);
-        mPlayer.setVideoPath(DEFAULT_TEST_URL_VOD);
+        mPlayer.setVideoPath(DEFAULT_TEST_LOCAL_MP4);
         mPlayer.start();
         netWatchdog = new NetWatchdog(this);
         netWatchdog.setNetChangeListener(new NetWatchdog.NetChangeListener() {

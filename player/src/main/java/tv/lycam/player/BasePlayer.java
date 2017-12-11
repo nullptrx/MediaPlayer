@@ -68,7 +68,7 @@ public abstract class BasePlayer extends RatioFrameLayout implements IMediaStatu
         super(context, attrs, defStyleAttr);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.StandardPlayer, defStyleAttr, 0);
         //获取参考边
-        mPlayerType = typedArray.getInteger(R.styleable.StandardPlayer_PlayerType, IVideoView.TYPE_ALIPLAYER);
+        mPlayerType = typedArray.getInt(R.styleable.StandardPlayer_player, IVideoView.TYPE_ALIPLAYER);
         typedArray.recycle();
         init(context);
     }
@@ -197,7 +197,7 @@ public abstract class BasePlayer extends RatioFrameLayout implements IMediaStatu
         }
     }
 
-    protected void stop() {
+    public void stop() {
         if (isAutoKeepScreen) {
             Activity activity = CommonUtil.getActivityContext(mContext);
             if (activity != null) {
