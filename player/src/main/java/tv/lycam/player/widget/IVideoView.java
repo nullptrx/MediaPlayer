@@ -2,7 +2,6 @@ package tv.lycam.player.widget;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
 import android.support.annotation.IntRange;
 import android.util.AttributeSet;
 import android.view.Surface;
@@ -52,11 +51,6 @@ public abstract class IVideoView extends TextureView {
             mMeasureHelper.setVideoSize(videoWidth, videoHeight);
             requestLayout();
         }
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            setVideoRotation(90);
-        } else {
-            setVideoRotation(0);
-        }
     }
 
     public void setVideoSampleAspectRatio(int videoSarNum, int videoSarDen) {
@@ -70,7 +64,7 @@ public abstract class IVideoView extends TextureView {
         if (mMeasureHelper != null) {
             mMeasureHelper.setVideoRotation(degree);
         }
-//        setRotation(degree);
+        setRotation(degree);
     }
 
     public void setAspectRatio(int aspectRatio) {
@@ -82,18 +76,8 @@ public abstract class IVideoView extends TextureView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        mMeasureHelper.doMeasure_16_9(widthMeasureSpec, heightMeasureSpec);
+        mMeasureHelper.doMeasure(widthMeasureSpec, heightMeasureSpec);
         setMeasuredDimension(mMeasureHelper.getMeasuredWidth(), mMeasureHelper.getMeasuredHeight());
-    }
-
-    @Override
-    protected void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            setVideoRotation(90);
-        } else {
-            setVideoRotation(0);
-        }
     }
 
     /**
