@@ -365,7 +365,9 @@ public class AliVcMediaPlayer implements MediaPlayer {
                     this.mPlayer.release();
                 }
                 stopReportHeart();
-                this.mHandler.getLooper().quit();
+                if (mHandler != null) {
+                    this.mHandler.getLooper().quit();
+                }
                 this.mMediaThread.quit();
                 this.mHandler = null;
                 this.mUIStatusHandler = null;
@@ -747,9 +749,11 @@ public class AliVcMediaPlayer implements MediaPlayer {
 
     public void play() {
         VcPlayerLog.d("AlivcPlayerJ", "play , sendMessage CMD_PLAY result = ");
-        Message msg = this.mHandler.obtainMessage();
-        msg.what = 2;
-        this.mHandler.sendMessage(msg);
+        if (mHandler != null) {
+            Message msg = this.mHandler.obtainMessage();
+            msg.what = 2;
+            this.mHandler.sendMessage(msg);
+        }
     }
 
     private void _stop() {
@@ -771,20 +775,24 @@ public class AliVcMediaPlayer implements MediaPlayer {
     }
 
     public void stop() {
-        this.mHandler.removeMessages(4);
-        this.mHandler.removeMessages(2);
-        this.mHandler.removeMessages(1);
-        this.mHandler.removeMessages(3);
-        VcPlayerLog.d("AlivcPlayerJ", "MPlayer: send stop message.");
-        Message msg = this.mHandler.obtainMessage();
-        msg.what = 3;
-        VcPlayerLog.d("AlivcPlayerJ", "stop , sendMessage = CMD_STOP result = " + this.mHandler.sendMessage(msg));
+        if (mHandler != null) {
+            this.mHandler.removeMessages(4);
+            this.mHandler.removeMessages(2);
+            this.mHandler.removeMessages(1);
+            this.mHandler.removeMessages(3);
+            VcPlayerLog.d("AlivcPlayerJ", "MPlayer: send stop message.");
+            Message msg = this.mHandler.obtainMessage();
+            msg.what = 3;
+            VcPlayerLog.d("AlivcPlayerJ", "stop , sendMessage = CMD_STOP result = " + this.mHandler.sendMessage(msg));
+        }
     }
 
     public void pause() {
-        Message msg = this.mHandler.obtainMessage();
-        msg.what = 4;
-        this.mHandler.sendMessage(msg);
+        if (mHandler != null) {
+            Message msg = this.mHandler.obtainMessage();
+            msg.what = 4;
+            this.mHandler.sendMessage(msg);
+        }
     }
 
     private void _pause() {
@@ -813,9 +821,11 @@ public class AliVcMediaPlayer implements MediaPlayer {
         setUrl(url);
         this.mKey = null;
         this.mCircleCount = 10;
-        Message msg = this.mHandler.obtainMessage();
-        msg.what = 1;
-        this.mHandler.sendMessage(msg);
+        if (mHandler != null) {
+            Message msg = this.mHandler.obtainMessage();
+            msg.what = 1;
+            this.mHandler.sendMessage(msg);
+        }
     }
 
     public void prepareAndPlay(String url) {
@@ -824,9 +834,11 @@ public class AliVcMediaPlayer implements MediaPlayer {
             this.mKey = null;
             this.mCircleCount = 10;
             VcPlayerLog.d("AlivcPlayerJ", "prepareAndPlay , status = " + this.mStatus);
-            Message msg = this.mHandler.obtainMessage();
-            msg.what = 8;
-            boolean result = this.mHandler.sendMessage(msg);
+            if (mHandler != null) {
+                Message msg = this.mHandler.obtainMessage();
+                msg.what = 8;
+                boolean result = this.mHandler.sendMessage(msg);
+            }
             return;
         }
         this.mUIStatusHandler.sendEmptyMessage(20);
@@ -839,9 +851,11 @@ public class AliVcMediaPlayer implements MediaPlayer {
         this.mCircleCount = circleCount;
         this.mSeekPosition = start_ms;
         this.mDefaultDecoder = decoderType;
-        Message msg = this.mHandler.obtainMessage();
-        msg.what = 1;
-        this.mHandler.sendMessage(msg);
+        if (mHandler != null) {
+            Message msg = this.mHandler.obtainMessage();
+            msg.what = 1;
+            this.mHandler.sendMessage(msg);
+        }
     }
 
     public int getDuration() {
@@ -897,10 +911,12 @@ public class AliVcMediaPlayer implements MediaPlayer {
     }
 
     public void reset() {
-        this.mHandler.removeMessages(4);
-        this.mHandler.removeMessages(2);
-        this.mHandler.removeMessages(1);
-        this.mHandler.removeMessages(3);
+        if (mHandler != null) {
+            this.mHandler.removeMessages(4);
+            this.mHandler.removeMessages(2);
+            this.mHandler.removeMessages(1);
+            this.mHandler.removeMessages(3);
+        }
         _reset();
     }
 
