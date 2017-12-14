@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -8,13 +9,19 @@
     <tv.lycam.player.widget.IjkVideoView
         android:id="@+id/player_ijk"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
     <tv.lycam.player.widget.AliVideoView
         android:id="@+id/player_ali"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
+    <tv.lycam.player.single.StandardPlayer
+        android:id="@+id/player_single"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
     <!-- <ImageView
          android:layout_width="match_parent"

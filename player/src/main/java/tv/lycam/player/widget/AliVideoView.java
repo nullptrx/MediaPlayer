@@ -18,8 +18,8 @@ import com.alivc.player.Size;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import tv.lycam.player.callback.IMediaStatus;
 import tv.lycam.player.PlayerState;
+import tv.lycam.player.callback.IMediaStatus;
 import tv.lycam.player.utils.Debugger;
 
 /**
@@ -440,6 +440,4 @@ public class AliVideoView extends IVideoView implements TextureView.SurfaceTextu
             mMediaPlayer.setVideoScalingMode(scalingMode);
         }
     }
-
-
 }
